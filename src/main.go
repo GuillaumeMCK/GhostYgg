@@ -1,6 +1,7 @@
 package main
 
 import (
+	"GhostYgg/src/utils"
 	"flag"
 	"fmt"
 	"github.com/anacrolix/torrent"
@@ -92,7 +93,7 @@ func main() {
 	for i, file := range filesFlag {
 
 		// Check if the file already exists in the download folder
-		err = checkFileExistence(downloadFolder, file)
+		err = utils.Exist(downloadFolder, file)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -102,8 +103,6 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		// Print some information about the torrent
 
 		// Start downloading the torrent
 		t.DownloadAll()
@@ -130,8 +129,8 @@ func trackDownloadProgress(t *torrent.Torrent, i int) {
 	// Wait for the torrent to get info
 	<-t.GotInfo()
 
-	down := strings.Repeat(DOWN, i)
-	up := strings.Repeat(UP, i)
+	down := strings.Repeat(utils.DOWN, i)
+	up := strings.Repeat(utils.UP, i)
 	percent := 0
 	// if the name is too long, cap it
 	name := t.Info().Name
@@ -146,9 +145,9 @@ func trackDownloadProgress(t *torrent.Torrent, i int) {
 
 		fmt.Printf("%s\r[%s] statut: %s/%s %s seeders:%s nom:%s%s",
 			down,
-			getDateTime(),
-			color.CyanString(byteSuffixes(t.BytesCompleted())),
-			color.GreenString(byteSuffixes(t.Info().TotalLength())),
+			utils.GetDateTime(),
+			color.CyanString(utils.ByteSuffixes(t.BytesCompleted())),
+			color.GreenString(utils.ByteSuffixes(t.Info().TotalLength())),
 			color.MagentaString(strconv.Itoa(percent)+"%"),
 			color.RedString(strconv.Itoa(t.Stats().ConnectedSeeders)),
 			color.YellowString(name),
@@ -160,7 +159,7 @@ func trackDownloadProgress(t *torrent.Torrent, i int) {
 			break
 		}
 
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(250 * time.Millisecond)
 	}
 
 	fmt.Println(color.GreenString("\n\nTéléchargement terminé : %s", t.Info().Name))
