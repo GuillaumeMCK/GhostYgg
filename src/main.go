@@ -16,7 +16,6 @@ import (
 	"time"
 )
 
-// CLI flags
 var (
 	filesFlag []string
 	output    *string

@@ -1,0 +1,85 @@
+name: Build and Release GhostYgg
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - '.github/workflows/build-and-release.yml'
+      - 'go.mod'
+      - 'go.sum'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - '.github/workflows/build-and-release.yml'
+      - 'go.mod'
+      - 'go.sum'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+
+      - name: Build Linux Executable
+        run: go build -v -o GhostYgg-linux ./src/main.go
+
+      - name: Build macOS ARM Executable
+        run: go build -v -o GhostYgg-macos-arm ./src/main.go
+
+      - name: Build Windows Executable
+        run: go build -v -o GhostYgg-windows.exe ./src/main.go
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          tag_name: v1.0.0+${{ github.run_number }}
+          release_name: v1.0.0+${{ github.run_number }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Linux Release Asset
+        if: steps.create_release.outputs.id != ''
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./GhostYgg-linux
+          asset_name: GhostYgg-linux
+          asset_content_type: application/octet-stream
+
+      - name: Upload macOS ARM Release Asset
+        if: steps.create_release.outputs.id != ''
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./GhostYgg-macos-arm
+          asset_name: GhostYgg-macos-arm
+          asset_content_type: application/octet-stream
+
+      - name: Upload Windows Release Asset
+        if: steps.create_release.outputs.id != ''
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./GhostYgg-windows.exe
+          asset_name: GhostYgg-windows.exe
+          asset_content_type: application/octet-stream
