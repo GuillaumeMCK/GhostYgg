@@ -36,6 +36,7 @@ func init() {
 
 	// Define how to use the program
 	flag.Usage = func() {
+		fmt.Printf("GhostYgg - Download torrents\n\n")
 		fmt.Printf("Usage: %s file1.torrent file2.torrent ... \n\n", filepath.Base(os.Args[0]))
 		fmt.Printf("Download torrents.\n\n")
 		fmt.Printf("Options:\n")
@@ -143,14 +144,14 @@ func trackDownloadProgress(t *torrent.Torrent, i int) {
 		// Get the percentage of the torrent that is downloaded
 		percent = int(t.BytesCompleted() * 100 / t.Info().TotalLength())
 
-		fmt.Printf("%s\r[%s] Status: %s/%s %s seeders:%s name:%s%s",
+		fmt.Printf("%s\r[%s] status: %s/%s %s seeders:%s name:%s%s",
 			down,
 			utils.GetDateTime(),
 			color.CyanString(utils.ByteSuffixes(t.BytesCompleted())),
-			color.GreenString(utils.ByteSuffixes(t.Info().TotalLength())),
+			utils.ByteSuffixes(t.Info().TotalLength()),
 			color.MagentaString(strconv.Itoa(percent)+"%"),
-			color.RedString(strconv.Itoa(t.Stats().ConnectedSeeders)),
-			color.YellowString(name),
+			color.GreenString(strconv.Itoa(t.Stats().ConnectedSeeders)),
+			name,
 			up,
 		)
 
