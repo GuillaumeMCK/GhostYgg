@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-// cli flags
+// CLI flags
 var (
 	filesFlag []string
 	output    *string
@@ -25,19 +25,19 @@ var (
 
 func init() {
 	filesFlag = []string{}
-	// filter all args that are not torrent files
+	// Filter all args that are not torrent files
 	for _, arg := range os.Args[1:] {
 		if filepath.Ext(arg) == ".torrent" {
 			filesFlag = append(filesFlag, arg)
 		}
 	}
-	output = flag.String("output", "", "Répertoire de téléchargement")
-	helpFlag = flag.Bool("help", false, "Affiche ce message")
+	output = flag.String("output", "", "Download directory")
+	helpFlag = flag.Bool("help", false, "Show this message")
 
 	// Define how to use the program
 	flag.Usage = func() {
 		fmt.Printf("Usage: %s file1.torrent file2.torrent ... \n\n", filepath.Base(os.Args[0]))
-		fmt.Printf("Télécharger des torrents.\n\n")
+		fmt.Printf("Download torrents.\n\n")
 		fmt.Printf("Options:\n")
 		flag.PrintDefaults()
 	}
@@ -116,7 +116,7 @@ func main() {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		for range c {
-			fmt.Println("\nInterruption du téléchargement...")
+			fmt.Println("\nDownload interrupted...")
 			os.Exit(1)
 		}
 	}()
@@ -132,7 +132,7 @@ func trackDownloadProgress(t *torrent.Torrent, i int) {
 	down := strings.Repeat(utils.DOWN, i)
 	up := strings.Repeat(utils.UP, i)
 	percent := 0
-	// if the name is too long, cap it
+	// If the name is too long, cap it
 	name := t.Info().Name
 	if len(name) > 50 {
 		name = name[:50] + "..."
@@ -143,7 +143,7 @@ func trackDownloadProgress(t *torrent.Torrent, i int) {
 		// Get the percentage of the torrent that is downloaded
 		percent = int(t.BytesCompleted() * 100 / t.Info().TotalLength())
 
-		fmt.Printf("%s\r[%s] statut: %s/%s %s seeders:%s nom:%s%s",
+		fmt.Printf("%s\r[%s] Status: %s/%s %s seeders:%s name:%s%s",
 			down,
 			utils.GetDateTime(),
 			color.CyanString(utils.ByteSuffixes(t.BytesCompleted())),
@@ -162,7 +162,7 @@ func trackDownloadProgress(t *torrent.Torrent, i int) {
 		time.Sleep(250 * time.Millisecond)
 	}
 
-	fmt.Println(color.GreenString("\n\nTéléchargement terminé : %s", t.Info().Name))
+	fmt.Println(color.GreenString("\n\nDownload completed: %s", t.Info().Name))
 }
 
 func getDefaultDownloadFolder() (string, error) {
