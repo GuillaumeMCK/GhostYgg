@@ -32,13 +32,13 @@ jobs:
           go-version: 1.19
 
       - name: Build Linux Executable
-        run: go build -v -o GhostYgg-linux ./src/main.go
+        run: GOARCH=amd64 GOOS=linux go build -v -o GhostYgg-linux ./src/main.go
 
       - name: Build macOS ARM Executable
-        run: go build -v -o GhostYgg-macos-arm ./src/main.go
+        run: GOARCH=arm64 GOOS=darwin go build -v -o GhostYgg-macos-arm ./src/main.go
 
       - name: Build Windows Executable
-        run: go build -v -o GhostYgg-windows.exe ./src/main.go
+        run: GOARCH=amd64 GOOS=windows go build -v -o GhostYgg-windows.exe ./src/main.go
 
       - name: Create Release
         id: create_release
