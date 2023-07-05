@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - 'src/**'
-      - '.github/workflows/build-and-release.yml'
       - 'go.mod'
       - 'go.sum'
 
