@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/anacrolix/torrent"
 	"github.com/fatih/color"
-	"github.com/mitchellh/go-homedir"
+	"github.com/sqweek/dialog"
 	"log"
 	"os"
 	"os/signal"
@@ -53,14 +53,24 @@ func main() {
 		return
 	}
 
-	// If no file is specified, show the usage and exit
-	if len(filesFlag) == 0 {
-		flag.Usage()
-		return
+	// If no file is specified, show the file picker dialog
+	if dialog.Message("%s", "No torrent file specified. Do you want to choose a file?").YesNo() {
+		if len(filesFlag) == 0 {
+			// Open file explorer to choose a .torrent file
+			filePath, err := dialog.File().Filter("Torrent files", "torrent").Load()
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			filesFlag = []string{filePath}
+		}
+	} else {
+		os.Exit(0)
 	}
 
 	// Determine default download folder
-	defaultDownloadFolder, err := getDefaultDownloadFolder()
+	defaultDownloadFolder, err := utils.GetDefaultDownloadFolder()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -166,25 +176,6 @@ func trackDownloadProgress(t *torrent.Torrent, i int) {
 	}
 
 	fmt.Println(color.GreenString("\n\nDownload completed: %s", t.Info().Name))
-}
-
-func getDefaultDownloadFolder() (string, error) {
-	homeDir, err := homedir.Dir()
-	if err != nil {
-		return "", err
-	}
-
-	downloadFolder := ""
-	switch {
-	case os.Getenv("HOME") != "":
-		downloadFolder = os.Getenv("HOME") + "/Downloads"
-	case os.Getenv("USERPROFILE") != "":
-		downloadFolder = os.Getenv("USERPROFILE") + "\\Downloads"
-	default:
-		downloadFolder = homeDir
-	}
-
-	return downloadFolder, nil
 }
 
 func createClientConfig(downloadFolder string) *torrent.ClientConfig {
