@@ -10,7 +10,9 @@ const (
 	DOWN = "\033[B"
 )
 
-func ByteSuffixes(i int64) string {
+// withUnit default value is true
+func ByteSuffixes(i int64, withUnit ...bool) string {
+
 	const (
 		_  = iota             // ignore first value by assigning to blank identifier
 		KB = 1 << (10 * iota) // 1024
@@ -39,7 +41,11 @@ func ByteSuffixes(i int64) string {
 		value /= TB
 	}
 
-	return fmt.Sprintf("%.1f%s", value, suffix)
+	if len(withUnit) > 0 && !withUnit[0] {
+		return fmt.Sprintf("%.1f", value)
+	} else {
+		return fmt.Sprintf("%.1f%s", value, suffix)
+	}
 }
 
 func GetDateTime() string {

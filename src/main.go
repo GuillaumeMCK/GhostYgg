@@ -117,12 +117,14 @@ func main() {
 	go func() {
 		for range c {
 			fmt.Println("\nDownload interrupted...")
-			os.Exit(1)
+			os.Exit(0)
 		}
 	}()
 
 	// Wait for all torrents to finish downloading
 	client.WaitAll()
+	fmt.Printf("\nAll downloads completed. Files saved in %s\n", downloadFolder)
+	os.Exit(0)
 }
 
 func trackDownloadProgress(t *torrent.Torrent, i int) {
@@ -143,13 +145,14 @@ func trackDownloadProgress(t *torrent.Torrent, i int) {
 		// Get the percentage of the torrent that is downloaded
 		percent = int(t.BytesCompleted() * 100 / t.Info().TotalLength())
 
-		fmt.Printf("%s\r[%s] status: %s/%s %s seeders:%s name:%s%s",
+		fmt.Printf("%s\r[%s] status: %s/%s %s seed:%s leech:%s %s%s ",
 			down,
 			utils.GetDateTime(),
-			color.CyanString(utils.ByteSuffixes(t.BytesCompleted())),
+			color.CyanString(utils.ByteSuffixes(t.BytesCompleted(), false)),
 			utils.ByteSuffixes(t.Info().TotalLength()),
 			color.MagentaString(strconv.Itoa(percent)+"%"),
 			color.GreenString(strconv.Itoa(t.Stats().ConnectedSeeders)),
+			color.RedString(strconv.Itoa(t.Stats().ActivePeers-t.Stats().ConnectedSeeders)),
 			name,
 			up,
 		)
@@ -159,7 +162,7 @@ func trackDownloadProgress(t *torrent.Torrent, i int) {
 			break
 		}
 
-		time.Sleep(250 * time.Millisecond)
+		time.Sleep(500 * time.Millisecond)
 	}
 
 	fmt.Println(color.GreenString("\n\nDownload completed: %s", t.Info().Name))
