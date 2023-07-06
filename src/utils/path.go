@@ -18,6 +18,7 @@ func Exist(downloadFolder string, file string) error {
 }
 
 func GetDefaultDownloadFolder() (string, error) {
+	// Determine default download folder
 	homeDir, err := homedir.Dir()
 	if err != nil {
 		return "", err
