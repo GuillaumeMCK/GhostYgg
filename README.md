@@ -22,7 +22,7 @@
 ## Usage
 
 ```bash
-$ GhostYgg file1.torrent file2.torrent ...
+$ GhostYgg file1.torrent file2.torrent ... [options]
 ```
 **Note:** Dragging and dropping torrent files onto the executable is also supported.
 
