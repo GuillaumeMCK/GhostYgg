@@ -42,16 +42,22 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload Assets
+      - name: Upload Linux Executable
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: |
-            ./GhostYgg-linux
-            ./GhostYgg-windows.exe
-          asset_name: |
-            GhostYgg-linux
-            GhostYgg-windows.exe
+          asset_path: ./GhostYgg-linux
+          asset_name: GhostYgg-linux
+          asset_content_type: application/octet-stream
+
+      - name: Upload Windows Executable
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./GhostYgg-windows.exe
+          asset_name: GhostYgg-windows.exe
           asset_content_type: application/octet-stream
