@@ -131,8 +131,9 @@ func main() {
 
 	// Wait for all torrents to finish downloading
 	client.WaitAll()
-	time.Sleep(1 * time.Second)
-	fmt.Printf(color.GreenString("\n\nAll downloads completed. Files saved in %s\n", downloadFolder))
+	time.Sleep(1 * time.Second) // Wait for the last progress update
+
+	fmt.Printf(color.GreenString("\n\n🏁  All downloads completed. Files saved in %s\n", downloadFolder))
 
 	// Exit the program
 	os.Exit(0)
@@ -162,11 +163,11 @@ func trackDownloadProgress(t *torrent.Torrent, i int) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		maxNameLength := consoleWidth - 10
+		maxNameLength := consoleWidth - 50
 		if len(name) > maxNameLength {
 			name = name[:maxNameLength] + "..."
 		}
-		fmt.Printf("%s\r[%s] %s %s seed:%s leech:%s Rate: %s %s%s",
+		fmt.Printf("%s\r➡️  [%s] %s %s seed:%s leech:%s Rate: %s %s%s",
 			down,
 			utils.GetDateTime(),
 			color.YellowString(utils.FormatBytesProgress(t.BytesCompleted(), t.Info().TotalLength())),
@@ -186,7 +187,12 @@ func trackDownloadProgress(t *torrent.Torrent, i int) {
 		time.Sleep(500 * time.Millisecond)
 	}
 
-	fmt.Printf("%s\rDownload completed: %s%s\n", down, color.GreenString(name), up)
+	fmt.Printf("%s\r✅  [%s] Download completed: %s%s",
+		down,
+		utils.GetDateTime(),
+		color.GreenString(name),
+		up,
+	)
 }
 
 func createClientConfig(downloadFolder string) *torrent.ClientConfig {
@@ -207,7 +213,7 @@ func handleInterruptSignal() {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		for range c {
-			fmt.Println(color.RedString("\nDownload interrupted..."))
+			fmt.Println(color.RedString("\n\n❌ Download cancelled by user"))
 			os.Exit(0)
 		}
 	}()
