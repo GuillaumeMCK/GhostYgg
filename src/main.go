@@ -7,12 +7,14 @@ import (
 	"github.com/anacrolix/torrent"
 	"github.com/fatih/color"
 	"github.com/sqweek/dialog"
+	"golang.org/x/crypto/ssh/terminal"
 	"log"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -53,20 +55,22 @@ func main() {
 		return
 	}
 
-	// If no file is specified, show the file picker dialog
-	if dialog.Message("%s", "No torrent file specified. Do you want to choose a file?").YesNo() {
-		if len(filesFlag) == 0 {
-			// Open file explorer to choose a .torrent file
-			filePath, err := dialog.File().Filter("Torrent files", "torrent").Load()
+	if len(filesFlag) == 0 {
+		// If no file is specified, show the file picker dialog
+		if dialog.Message("%s", "No torrent file specified. Do you want to choose a file?").YesNo() {
+			if len(filesFlag) == 0 {
+				// Open file explorer to choose a .torrent file
+				filePath, err := dialog.File().Filter("Torrent files", "torrent").Load()
 
-			if err != nil {
-				log.Fatal(err)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				filesFlag = []string{filePath}
 			}
-
-			filesFlag = []string{filePath}
+		} else {
+			os.Exit(0)
 		}
-	} else {
-		os.Exit(0)
 	}
 
 	// Determine default download folder
@@ -121,19 +125,16 @@ func main() {
 		go trackDownloadProgress(t, i)
 	}
 
-	// Handle system interrupt signal (ctrl+c)
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	go func() {
-		for range c {
-			fmt.Println("\nDownload interrupted...")
-			os.Exit(0)
-		}
-	}()
+	// Handle system signals
+	handleInterruptSignal()
+	handleTerminalResize()
 
 	// Wait for all torrents to finish downloading
 	client.WaitAll()
-	fmt.Printf("\nAll downloads completed. Files saved in %s\n", downloadFolder)
+	time.Sleep(1 * time.Second)
+	fmt.Printf(color.GreenString("\n\nAll downloads completed. Files saved in %s\n", downloadFolder))
+
+	// Exit the program
 	os.Exit(0)
 }
 
@@ -144,25 +145,35 @@ func trackDownloadProgress(t *torrent.Torrent, i int) {
 	down := strings.Repeat(utils.DOWN, i)
 	up := strings.Repeat(utils.UP, i)
 	percent := 0
-	// If the name is too long, cap it
 	name := t.Info().Name
-	if len(name) > 50 {
-		name = name[:50] + "..."
-	}
 
 	// Track download progress
+	startTime := time.Now()
 	for {
 		// Get the percentage of the torrent that is downloaded
 		percent = int(t.BytesCompleted() * 100 / t.Info().TotalLength())
 
-		fmt.Printf("%s\r[%s] status: %s/%s %s seed:%s leech:%s %s%s ",
+		// Calculate download rate in MB/s
+		elapsedTime := time.Since(startTime)
+		downloadRate := float64(t.BytesCompleted()) / elapsedTime.Seconds() / 1024 / 1024
+
+		// Adjust the name length dynamically based on the console width
+		consoleWidth, _, err := terminal.GetSize(int(os.Stdout.Fd()))
+		if err != nil {
+			log.Fatal(err)
+		}
+		maxNameLength := consoleWidth - 10
+		if len(name) > maxNameLength {
+			name = name[:maxNameLength] + "..."
+		}
+		fmt.Printf("%s\r[%s] %s %s seed:%s leech:%s Rate: %s %s%s",
 			down,
 			utils.GetDateTime(),
-			color.CyanString(utils.ByteSuffixes(t.BytesCompleted(), false)),
-			utils.ByteSuffixes(t.Info().TotalLength()),
+			color.YellowString(utils.FormatBytesProgress(t.BytesCompleted(), t.Info().TotalLength())),
 			color.MagentaString(strconv.Itoa(percent)+"%"),
 			color.GreenString(strconv.Itoa(t.Stats().ConnectedSeeders)),
 			color.RedString(strconv.Itoa(t.Stats().ActivePeers-t.Stats().ConnectedSeeders)),
+			color.CyanString("%.2fMB/s", downloadRate),
 			name,
 			up,
 		)
@@ -175,11 +186,11 @@ func trackDownloadProgress(t *torrent.Torrent, i int) {
 		time.Sleep(500 * time.Millisecond)
 	}
 
-	fmt.Println(color.GreenString("\n\nDownload completed: %s", t.Info().Name))
+	fmt.Printf("%s\rDownload completed: %s%s\n", down, color.GreenString(name), up)
 }
 
 func createClientConfig(downloadFolder string) *torrent.ClientConfig {
-	// Create a new configuration for the torrent client
+	// Create a new configuration for the torrent client and disable http trackers
 	clientConfig := torrent.NewDefaultClientConfig()
 	clientConfig.DataDir = downloadFolder
 	clientConfig.DisableTrackers = false
@@ -189,4 +200,26 @@ func createClientConfig(downloadFolder string) *torrent.ClientConfig {
 	clientConfig.Debug = false
 	clientConfig.DisableWebtorrent = true
 	return clientConfig
+}
+
+func handleInterruptSignal() {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for range c {
+			fmt.Println(color.RedString("\nDownload interrupted..."))
+			os.Exit(0)
+		}
+	}()
+}
+
+func handleTerminalResize() {
+	resize := make(chan os.Signal, 1)
+	signal.Notify(resize, syscall.SIGWINCH)
+	go func() {
+		for range resize {
+			<-resize
+			utils.ClearScreen()
+		}
+	}()
 }

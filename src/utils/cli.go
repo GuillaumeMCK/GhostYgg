@@ -10,44 +10,50 @@ const (
 	DOWN = "\033[B"
 )
 
-// withUnit default value is true
-func ByteSuffixes(i int64, withUnit ...bool) string {
+const (
+	_  = iota             // ignore first value by assigning to blank identifier
+	KB = 1 << (10 * iota) // 1024
+	MB
+	GB
+	TB
+)
 
-	const (
-		_  = iota             // ignore first value by assigning to blank identifier
-		KB = 1 << (10 * iota) // 1024
-		MB
-		GB
-		TB
-	)
-
-	var suffix string
-	value := float64(i)
-
+func byteSuffixes(i int64) (suffix string, unit float64) {
 	switch {
 	case i < KB:
 		suffix = "B"
+		unit = 1
 	case i < MB:
 		suffix = "KB"
-		value /= KB
+		unit = KB
 	case i < GB:
 		suffix = "MB"
-		value /= MB
+		unit = MB
 	case i < TB:
 		suffix = "GB"
-		value /= GB
+		unit = GB
 	default:
 		suffix = "TB"
-		value /= TB
+		unit = TB
 	}
+	return
+}
 
-	if len(withUnit) > 0 && !withUnit[0] {
-		return fmt.Sprintf("%.1f", value)
-	} else {
-		return fmt.Sprintf("%.1f%s", value, suffix)
-	}
+func FormatBytesProgress(bytesCompleted, totalLength int64) string {
+	suffix, unit := byteSuffixes(totalLength)
+	return fmt.Sprintf("%.1f/%.1f%s",
+		float64(bytesCompleted)/unit,
+		float64(totalLength)/unit,
+		suffix)
 }
 
 func GetDateTime() string {
 	return time.Now().Format("02/01/2006 15:04:05")
+}
+
+func ClearScreen() {
+	// Clear the screen by printing ANSI escape sequences
+	fmt.Print("\033[H\033[2J")
+	// Move the cursor to the top left
+	fmt.Print("\033[1;1H")
 }
