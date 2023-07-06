@@ -187,6 +187,6 @@ func createClientConfig(downloadFolder string) *torrent.ClientConfig {
 	clientConfig.NoUpload = true
 	clientConfig.DisableIPv6 = false
 	clientConfig.Debug = false
-
+	clientConfig.DisableWebtorrent = true
 	return clientConfig
 }
