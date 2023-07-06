@@ -7,13 +7,11 @@ import (
 	"github.com/anacrolix/torrent"
 	"github.com/fatih/color"
 	"github.com/sqweek/dialog"
-	"golang.org/x/crypto/ssh/terminal"
 	"log"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"syscall"
 	"time"
 )
@@ -131,7 +129,7 @@ func main() {
 
 	// Wait for all torrents to finish downloading
 	client.WaitAll()
-	time.Sleep(1 * time.Second) // Wait for the last progress update
+	time.Sleep(250 * time.Millisecond) // Wait for the last progress update
 
 	fmt.Printf(color.GreenString("\n\n🏁  All downloads completed. Files saved in %s\n", downloadFolder))
 
@@ -139,14 +137,14 @@ func main() {
 	os.Exit(0)
 }
 
+// trackDownloadProgress tracks the download progress of a torrent
 func trackDownloadProgress(t *torrent.Torrent, i int) {
 	// Wait for the torrent to get info
 	<-t.GotInfo()
 
-	down := strings.Repeat(utils.DOWN, i)
-	up := strings.Repeat(utils.UP, i)
 	percent := 0
 	name := t.Info().Name
+	msg := ""
 
 	// Track download progress
 	startTime := time.Now()
@@ -159,25 +157,16 @@ func trackDownloadProgress(t *torrent.Torrent, i int) {
 		downloadRate := float64(t.BytesCompleted()) / elapsedTime.Seconds() / 1024 / 1024
 
 		// Adjust the name length dynamically based on the console width
-		consoleWidth, _, err := terminal.GetSize(int(os.Stdout.Fd()))
-		if err != nil {
-			log.Fatal(err)
-		}
-		maxNameLength := consoleWidth - 50
-		if len(name) > maxNameLength {
-			name = name[:maxNameLength] + "..."
-		}
-		fmt.Printf("%s\r➡️  [%s] %s %s seed:%s leech:%s Rate: %s %s%s",
-			down,
+		msg = fmt.Sprintf("➡️  [%s] %s %s seed:%s leech:%s Rate: %s %s",
 			utils.GetDateTime(),
 			color.YellowString(utils.FormatBytesProgress(t.BytesCompleted(), t.Info().TotalLength())),
 			color.MagentaString(strconv.Itoa(percent)+"%"),
 			color.GreenString(strconv.Itoa(t.Stats().ConnectedSeeders)),
 			color.RedString(strconv.Itoa(t.Stats().ActivePeers-t.Stats().ConnectedSeeders)),
 			color.CyanString("%.2fMB/s", downloadRate),
-			name,
-			up,
-		)
+			name)
+
+		utils.PrintRow(i, msg)
 
 		// If the torrent is fully downloaded, stop tracking progress
 		if t.BytesCompleted() == t.Info().TotalLength() {
@@ -186,17 +175,14 @@ func trackDownloadProgress(t *torrent.Torrent, i int) {
 
 		time.Sleep(500 * time.Millisecond)
 	}
-
-	fmt.Printf("%s\r✅  [%s] Download completed: %s%s",
-		down,
+	utils.PrintRow(i, fmt.Sprintf("✅ [%s] Download completed: %s",
 		utils.GetDateTime(),
 		color.GreenString(name),
-		up,
-	)
+	))
 }
 
+// createClientConfig creates a new configuration for the torrent client
 func createClientConfig(downloadFolder string) *torrent.ClientConfig {
-	// Create a new configuration for the torrent client and disable http trackers
 	clientConfig := torrent.NewDefaultClientConfig()
 	clientConfig.DataDir = downloadFolder
 	clientConfig.DisableTrackers = false
@@ -208,6 +194,7 @@ func createClientConfig(downloadFolder string) *torrent.ClientConfig {
 	return clientConfig
 }
 
+// handleInterruptSignal handles the interrupt signal (Ctrl+C)
 func handleInterruptSignal() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
@@ -219,6 +206,7 @@ func handleInterruptSignal() {
 	}()
 }
 
+// handleTerminalResize handles the terminal resize signal
 func handleTerminalResize() {
 	resize := make(chan os.Signal, 1)
 	signal.Notify(resize, syscall.SIGWINCH)
