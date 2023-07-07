@@ -129,7 +129,7 @@ func main() {
 
 	// Wait for all torrents to finish downloading
 	client.WaitAll()
-	time.Sleep(250 * time.Millisecond) // Wait for the last progress update
+	time.Sleep(500 * time.Millisecond) // Wait for the last progress update
 
 	fmt.Printf(color.GreenString("\n\n🏁  All downloads completed. File(s) saved in %s\n", downloadFolder))
 
@@ -176,7 +176,7 @@ func trackDownloadProgress(t *torrent.Torrent, i int) {
 			))
 		}
 
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(250 * time.Millisecond)
 	}
 }
 

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"fmt"
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
@@ -86,20 +87,29 @@ func PrintRow(rowIndex int, s string) {
 func truncate(s string, width int) string {
 	printableLen := len(s) - countEscapeCharsAndColors(s)
 	if printableLen > width {
-		// Truncate the string to the specified width
-		tmpStr := s[:width]
-		// Count the number of ANSI escape characters and color codes in the truncated string
-		countOfEscapeCharsAndColors := countEscapeCharsAndColors(tmpStr)
-		// Truncate the string again, this time taking into account the number of ANSI escape characters and color codes
-		tmpStr = s[:width+countOfEscapeCharsAndColors-8]
-		// Append ellipsis to the truncated string
-		return tmpStr + "..."
-	} else {
-		// Calculate the spacing needed to reach the specified width
-		spacing := width - printableLen
-		// Append the required spacing to the original string
-		return s + fmt.Sprintf("%*s", spacing, "")
+		// Calculate the number of characters needed for ellipsis
+		ellipsisWidth := 3
+		// Create a buffer to build the truncated string
+		var truncated bytes.Buffer
+		truncated.Grow(width + ellipsisWidth)
+
+		// Iterate over the string and truncate as necessary
+		for _, char := range s {
+			truncated.WriteRune(char)
+			if truncated.Len()-countEscapeCharsAndColors(truncated.String()) >= width {
+				break
+			}
+		}
+		// Remove the last three characters and append ellipsis
+		truncated.Truncate(truncated.Len() - ellipsisWidth)
+		truncated.WriteString("...")
+		return truncated.String()
 	}
+
+	// Calculate the spacing needed to reach the specified width
+	spacing := width - printableLen
+	// Append the required spacing to the original string
+	return s + strings.Repeat(" ", spacing)
 }
 
 // countEscapeCharsAndColors counts the number of ANSI escape characters and color codes in the given string.
