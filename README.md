@@ -53,14 +53,6 @@ Make sure you have Go installed on your system.
    $ ./GhostYgg file1.torrent file2.torrent ...
    ```
 
-## Example
-
-To download a torrent file, run the following command:
-
-```bash
-$ ./GhostYgg example.torrent
-```
-
 ## Default Download Folder
 
 If no download directory is specified using the `-output` flag, the tool will use the default download folder of your operating system.
