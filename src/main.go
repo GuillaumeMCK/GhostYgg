@@ -12,7 +12,6 @@ import (
 	"os/signal"
 	"path/filepath"
 	"strconv"
-	"syscall"
 	"time"
 )
 
@@ -125,7 +124,6 @@ func main() {
 
 	// Handle system signals
 	handleInterruptSignal()
-	handleTerminalResize()
 
 	// Wait for all torrents to finish downloading
 	client.WaitAll()
@@ -201,18 +199,6 @@ func handleInterruptSignal() {
 		for range c {
 			fmt.Println(color.RedString("\n\n❌ Download cancelled by user"))
 			os.Exit(0)
-		}
-	}()
-}
-
-// handleTerminalResize handles the terminal resize signal
-func handleTerminalResize() {
-	resize := make(chan os.Signal, 1)
-	signal.Notify(resize, syscall.SIGWINCH)
-	go func() {
-		for range resize {
-			<-resize
-			utils.ClearScreen()
 		}
 	}()
 }
