@@ -1,5 +1,3 @@
-<div align="center">
-
 ```
                                                                            ▄▄███████████████████████████████████████▄       
                                                                          ▄█████████████████████████████████████████████▄    
@@ -15,16 +13,15 @@
                                                                          ▀██████████████████████████████████████████████▀   
                                                                             ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀      
 ```
-</div>
 
 >A simple command-line tool for downloading torrents without seeding & increase download rate.
 
 ## Usage
 
 ```bash
-$ GhostYgg file1.torrent file2.torrent ...
+$ GhostYgg file1.torrent file2.torrent ... [options]
 ```
-**Note:** Dragging and dropping torrent files onto the executable is also supported.
+**Note:** Dragging and dropping torrent files onto the executable is also supported (Windows only at the moment).
 
 ## Options
 
@@ -63,16 +60,6 @@ To download a torrent file, run the following command:
 ```bash
 $ ./GhostYgg example.torrent
 ```
-
-## Progress Tracking
-
-The tool will display the download progress for each torrent file, including the following information:
-
-- Status: Downloaded bytes/Total size Percentage
-- Seeders: Number of connected seeders
-- Name: Torrent file name
-
-Once the download is complete, the tool will display a message indicating the completion.
 
 ## Default Download Folder
 
