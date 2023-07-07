@@ -157,7 +157,7 @@ func trackDownloadProgress(t *torrent.Torrent, i int) {
 		// If the torrent is still downloading
 		if t.BytesCompleted() < t.Info().TotalLength() {
 			date = utils.GetDateTime()
-			utils.PrintRow(i, fmt.Sprintf("➡️  [%s] %s %s seed:%s leech:%s Rate: %s %s",
+			utils.PrintRow(i, fmt.Sprintf("⬇️[%s] %s %s seed:%s leech:%s Rate: %s %s",
 				date,
 				color.YellowString(utils.FormatBytesProgress(t.BytesCompleted(), t.Info().TotalLength())),
 				color.MagentaString(strconv.Itoa(percent)+"%"),
@@ -197,7 +197,7 @@ func handleInterruptSignal() {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		for range c {
-			fmt.Println(color.RedString("\n\n❌ Download cancelled by user"))
+			fmt.Println(color.RedString("\n\n❌  Download cancelled by user"))
 			os.Exit(0)
 		}
 	}()

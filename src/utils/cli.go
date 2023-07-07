@@ -78,7 +78,7 @@ func PrintRow(rowIndex int, s string) {
 		fmt.Println(err)
 		return
 	}
-	s = truncate(s, consoleWidth)
+	s = truncate(s, consoleWidth-1) // truncate the string if its length exceeds the width of the console
 
 	fmt.Printf("%s%s\r%s%s", RESET, down, s, up)
 }
