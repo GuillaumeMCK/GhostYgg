@@ -10,8 +10,11 @@ import (
 )
 
 const (
-	UP   = "\033[A" // ANSI escape sequence to move the cursor up one line
-	DOWN = "\033[B" // ANSI escape sequence to move the cursor down one line
+	UP           = "\033[A"    // ANSI escape sequence to move the cursor up one line
+	DOWN         = "\033[B"    // ANSI escape sequence to move the cursor down one line
+	RESET        = "\033[0m"   // ANSI escape sequence to reset all attributes
+	CURSOR_START = "\033[1;1H" // ANSI escape sequence to move the cursor to the start of the line
+	CLEAR_SCREEN = "\033[2J"   // ANSI escape sequence to clear the screen
 )
 
 const (
@@ -60,27 +63,8 @@ func GetDateTime() string {
 
 // ClearScreen clears the terminal screen.
 func ClearScreen() {
-	// Clear the screen by printing ANSI escape sequences
-	fmt.Print("\033[H\033[2J")
-	// Move the cursor to the top left
-	fmt.Print("\033[1;1H")
-}
-
-// truncate truncates the given string if its length exceeds the maximum limit, appending ellipsis.
-func truncate(s string, max int) string {
-	if len(s) > max {
-		return s[:max-3] + "..."
-	} else {
-		spacing := max - (len(s) - countEscapeCharsAndColors(s))
-		return s + fmt.Sprintf("%*s", spacing, " ")
-	}
-}
-
-// countEscapeCharsAndColors counts the number of ANSI escape characters and color codes in the given string.
-func countEscapeCharsAndColors(input string) int {
-	re := regexp.MustCompile(`(\x1b\[[0-9;]+m)|\\[a-zA-Z]`)
-	matches := re.FindAllString(input, -1)
-	return len(matches)
+	fmt.Print(CLEAR_SCREEN)
+	fmt.Print(CURSOR_START)
 }
 
 // PrintRow prints a string on a specific row of the terminal, adjusting the row position and truncating the string if necessary.
@@ -88,14 +72,41 @@ func PrintRow(rowIndex int, s string) {
 	down := strings.Repeat(DOWN, rowIndex)
 	up := strings.Repeat(UP, rowIndex)
 
-	consoleWidth, _, err := terminal.GetSize(int(os.Stdout.Fd()))
+	consoleWidth, _, err := terminal.GetSize(int(os.Stdout.Fd())) // get the width of the console in characters
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
-
-	consoleWidth += countEscapeCharsAndColors(s)
-
 	s = truncate(s, consoleWidth)
 
-	fmt.Printf("%s\r%s%s", down, s, up)
+	fmt.Printf("%s%s\r%s%s", RESET, down, s, up)
+}
+
+// truncate truncates the given string if its length exceeds the maximum limit, appending ellipsis.
+func truncate(s string, width int) string {
+	printableLen := len(s) - countEscapeCharsAndColors(s)
+	if printableLen > width {
+		// Truncate the string to the specified width
+		tmpStr := s[:width]
+		// Count the number of ANSI escape characters and color codes in the truncated string
+		countOfEscapeCharsAndColors := countEscapeCharsAndColors(tmpStr)
+		// Truncate the string again, this time taking into account the number of ANSI escape characters and color codes
+		tmpStr = s[:width+countOfEscapeCharsAndColors-8]
+		// Append ellipsis to the truncated string
+		return tmpStr + "..."
+	} else {
+		// Calculate the spacing needed to reach the specified width
+		spacing := width - printableLen
+		// Append the required spacing to the original string
+		return s + fmt.Sprintf("%*s", spacing, "")
+	}
+}
+
+// countEscapeCharsAndColors counts the number of ANSI escape characters and color codes in the given string.
+func countEscapeCharsAndColors(input string) int {
+	// improve regex. add reset color code and other special characters that not shown in the terminal
+	re := regexp.MustCompile(`\033\[[0-9;]*[a-zA-Z]`)
+	// find all matches in the string
+	matches := re.FindAllString(input, -1)
+	return len(matches) * 5 // each escape character ≈ 4 characters
 }
