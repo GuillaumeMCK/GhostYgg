@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"GhostYgg/src/cli"
 	"bytes"
 	"fmt"
 	"golang.org/x/crypto/ssh/terminal"
@@ -8,14 +9,6 @@ import (
 	"regexp"
 	"strings"
 	"time"
-)
-
-const (
-	UP           = "\033[A"    // ANSI escape sequence to move the cursor up one line
-	DOWN         = "\033[B"    // ANSI escape sequence to move the cursor down one line
-	RESET        = "\033[0m"   // ANSI escape sequence to reset all attributes
-	CURSOR_START = "\033[1;1H" // ANSI escape sequence to move the cursor to the start of the line
-	CLEAR_SCREEN = "\033[2J"   // ANSI escape sequence to clear the screen
 )
 
 const (
@@ -63,15 +56,11 @@ func GetDateTime() string {
 }
 
 // ClearScreen clears the terminal screen.
-func ClearScreen() {
-	fmt.Print(CLEAR_SCREEN)
-	fmt.Print(CURSOR_START)
-}
 
 // PrintRow prints a string on a specific row of the terminal, adjusting the row position and truncating the string if necessary.
 func PrintRow(rowIndex int, s string) {
-	down := strings.Repeat(DOWN, rowIndex)
-	up := strings.Repeat(UP, rowIndex)
+	down := strings.Repeat(cli.DOWN, rowIndex)
+	up := strings.Repeat(cli.UP, rowIndex)
 
 	consoleWidth, _, err := terminal.GetSize(int(os.Stdout.Fd())) // get the width of the console in characters
 	if err != nil {
@@ -80,7 +69,7 @@ func PrintRow(rowIndex int, s string) {
 	}
 	s = truncate(s, consoleWidth-1) // truncate the string if its length exceeds the width of the console
 
-	fmt.Printf("%s%s\r%s%s", RESET, down, s, up)
+	fmt.Printf("%s%s\r%s%s", cli.RESET, down, s, up)
 }
 
 // truncate truncates the given string if its length exceeds the maximum limit, appending ellipsis.
