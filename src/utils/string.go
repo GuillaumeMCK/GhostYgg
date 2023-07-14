@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"GhostYgg/src/cli"
+	"GhostYgg/src/tui"
 	"bytes"
 	"fmt"
 	"golang.org/x/crypto/ssh/terminal"
@@ -59,8 +59,8 @@ func GetDateTime() string {
 
 // PrintRow prints a string on a specific row of the terminal, adjusting the row position and truncating the string if necessary.
 func PrintRow(rowIndex int, s string) {
-	down := strings.Repeat(cli.DOWN, rowIndex)
-	up := strings.Repeat(cli.UP, rowIndex)
+	down := strings.Repeat(tui.DOWN, rowIndex)
+	up := strings.Repeat(tui.UP, rowIndex)
 
 	consoleWidth, _, err := terminal.GetSize(int(os.Stdout.Fd())) // get the width of the console in characters
 	if err != nil {
@@ -69,7 +69,7 @@ func PrintRow(rowIndex int, s string) {
 	}
 	s = truncate(s, consoleWidth-1) // truncate the string if its length exceeds the width of the console
 
-	fmt.Printf("%s%s\r%s%s", cli.RESET, down, s, up)
+	fmt.Printf("%s%s\r%s%s", tui.RESET, down, s, up)
 }
 
 // truncate truncates the given string if its length exceeds the maximum limit, appending ellipsis.
@@ -108,4 +108,13 @@ func countEscapeCharsAndColors(input string) int {
 	// find all matches in the string
 	matches := re.FindAllString(input, -1)
 	return len(matches) * 5 // each escape character ≈ 4 characters
+}
+
+// FormatDuration formats a duration in a human-readable format.
+func FormatDuration(duration time.Duration) string {
+	hours := int(duration.Hours())
+	minutes := int(duration.Minutes()) % 60
+	seconds := int(duration.Seconds()) % 60
+
+	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)
 }

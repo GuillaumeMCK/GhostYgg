@@ -19,7 +19,7 @@
 ## Usage
 
 ```bash
-$ GhostYgg file1.torrent file2.torrent ... [options]
+$ GhostYgg file1.client file2.client ... [options]
 ```
 **Note:** Dragging and dropping torrent files onto the executable is also supported (Windows only at the moment).
 
@@ -50,7 +50,7 @@ Make sure you have Go installed on your system.
 3. Run the executable:
 
    ```bash
-   $ ./GhostYgg file1.torrent file2.torrent ...
+   $ ./GhostYgg file1.client file2.client ...
    ```
 
 ## Default Download Folder

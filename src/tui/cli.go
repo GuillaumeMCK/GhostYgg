@@ -1,7 +1,9 @@
-package cli
+package tui
 
 import (
 	"fmt"
+	"golang.org/x/crypto/ssh/terminal"
+	"os"
 )
 
 const (
@@ -12,7 +14,18 @@ const (
 	CLEAR_SCREEN = "\033[2J"   // ANSI escape sequence to clear the screen
 )
 
+const (
+	PRIMARYC          = "#FF00FF"
+	PRIMARYC_SELECTED = "#FFFFFF"
+	FONTC             = "#FFFFFF"
+	FONTC_SELECTED    = "#000000"
+)
+
 func ClearScreen() {
 	fmt.Print(CLEAR_SCREEN)
 	fmt.Print(CURSOR_START)
+}
+
+func GetTerminalSize() (int, int, error) {
+	return terminal.GetSize(int(os.Stdout.Fd()))
 }
