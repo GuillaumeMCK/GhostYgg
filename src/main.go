@@ -1,32 +1,90 @@
 package main
 
 import (
-	"GhostYgg/src/cli"
+	"GhostYgg/src/tui"
+	"GhostYgg/src/utils"
+	"flag"
 	"fmt"
+	"github.com/sqweek/dialog"
+	"log"
+	"os"
+	"path/filepath"
 )
 
+var (
+	torrentFiles   []string
+	output         *string
+	helpFlag       *bool
+	downloadFolder string
+)
+
+func init() {
+	torrentFiles = []string{}
+	// Filter all args that are not torrent files
+	for _, arg := range os.Args[1:] {
+		if filepath.Ext(arg) == ".torrent" {
+			torrentFiles = append(torrentFiles, arg)
+		}
+	}
+	output = flag.String("output", "", "Download directory")
+	helpFlag = flag.Bool("help", false, "Show this message")
+
+	// Define how to use the program
+	flag.Usage = func() {
+		fmt.Printf("GhostYgg - Download torrents\n\n")
+		fmt.Printf("Usage: %s file1.client file2.torrent ... [options]\n\n", os.Args[0])
+		fmt.Printf("Download torrents.\n\n")
+		fmt.Printf("Options:\n")
+		flag.PrintDefaults()
+	}
+
+	// Parse command-line flags
+	flag.Parse()
+
+	// If -help flag is set, show the usage and exit
+	if *helpFlag {
+		flag.Usage()
+		return
+	}
+
+	if len(torrentFiles) == 0 {
+		// If no file is specified, show the file picker dialog
+		if dialog.Message("%s", "No client file specified. Do you want to choose a file?").YesNo() {
+			if len(torrentFiles) == 0 {
+				// Open file explorer to choose a .client file
+				filePath, err := dialog.File().Filter("Torrent files", "torrent").Load()
+				if err != nil {
+					log.Fatal(err)
+				}
+				torrentFiles = []string{filePath}
+			}
+		} else {
+			torrentFiles = []string{}
+		}
+	}
+
+	// Determine default download folder
+	defaultDownloadFolder, err := utils.GetDefaultDownloadFolder()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Use the value of -download-folder flag, or default download folder
+	downloadFolder = *output
+	if downloadFolder == "" {
+		downloadFolder = defaultDownloadFolder
+	}
+
+	// Make sure download folder exists
+	err = os.MkdirAll(downloadFolder, os.ModePerm)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func main() {
-	columns := []string{"Name", "Age", "City"}
-	rows := [][]string{
-		{"John Doe", "25", "New York"},
-		{"Jane Smith", "30", "San Francisco"},
-		{"Bob Johnson", "40", "Chicago"},
+	err := tui.StartTea(torrentFiles, downloadFolder)
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	// Set the desired widths for each column
-	widths := []int{20, 10, 15}
-
-	// Print the table and get the selected row index
-	selectedRow := cli.PrintRows(rows, columns, widths)
-
-	if selectedRow >= 0 {
-		selectedData := rows[selectedRow]
-		fmt.Printf("Selected row: %v\n", selectedData)
-	} else {
-		fmt.Println("No row selected.")
-	}
-
-	// Wait for user input before exiting
-	fmt.Println("Press Enter to exit...")
-	_, _ = fmt.Scanln()
 }

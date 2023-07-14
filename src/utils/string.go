@@ -1,12 +1,12 @@
 package utils
 
 import (
-	"GhostYgg/src/cli"
 	"bytes"
 	"fmt"
-	"golang.org/x/crypto/ssh/terminal"
 	"os"
+	"os/exec"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -55,23 +55,6 @@ func GetDateTime() string {
 	return time.Now().Format("02/01/2006 15:04:05")
 }
 
-// ClearScreen clears the terminal screen.
-
-// PrintRow prints a string on a specific row of the terminal, adjusting the row position and truncating the string if necessary.
-func PrintRow(rowIndex int, s string) {
-	down := strings.Repeat(cli.DOWN, rowIndex)
-	up := strings.Repeat(cli.UP, rowIndex)
-
-	consoleWidth, _, err := terminal.GetSize(int(os.Stdout.Fd())) // get the width of the console in characters
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	s = truncate(s, consoleWidth-1) // truncate the string if its length exceeds the width of the console
-
-	fmt.Printf("%s%s\r%s%s", cli.RESET, down, s, up)
-}
-
 // truncate truncates the given string if its length exceeds the maximum limit, appending ellipsis.
 func truncate(s string, width int) string {
 	printableLen := len(s) - countEscapeCharsAndColors(s)
@@ -108,4 +91,32 @@ func countEscapeCharsAndColors(input string) int {
 	// find all matches in the string
 	matches := re.FindAllString(input, -1)
 	return len(matches) * 5 // each escape character ≈ 4 characters
+}
+
+// FormatDuration formats a duration in a human-readable format.
+func FormatDuration(duration time.Duration) string {
+	duration *= time.Second
+	hours := int(duration.Hours())
+	minutes := int(duration.Minutes()) % 60
+	seconds := int(duration.Seconds()) % 60
+
+	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)
+}
+
+// OpenDirectory opens the given directory in the default file manager. (macos, linux, windows)
+func OpenDirectory(dir string) error {
+	var cmd *exec.Cmd
+
+	switch runtime.GOOS {
+	case "darwin": // macOS
+		cmd = exec.Command("open", dir)
+	case "linux":
+		cmd = exec.Command("xdg-open", dir)
+	case "windows":
+		cmd = exec.Command("explorer", dir)
+	default:
+		return os.ErrNotExist // Unsupported operating system
+	}
+
+	return cmd.Run()
 }
