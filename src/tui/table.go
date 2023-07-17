@@ -1,4 +1,4 @@
-package table
+package tui
 
 import (
 	"GhostYgg/src/tui/constants"
@@ -7,8 +7,8 @@ import (
 	"math"
 )
 
-// Model represents the model of the table.
-type Model struct {
+// Table represents the model of the table.
+type Table struct {
 	table tab.Model
 	ctx   *TableCtx
 }
@@ -21,18 +21,18 @@ type TableCtx struct {
 }
 
 // Init initializes the table on creation.
-func (m Model) Init() tea.Cmd {
+func (m Table) Init() tea.Cmd {
 	m.refresh()
 	return nil
 }
 
 // Update handles the update messages for the model.
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Table) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-	switch _ := msg.(type) {
+	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 	case SelectedRowMsg:
-		return m, selectedRow(msg.(SelectedRowMsg).Index)
+		return m, selectedRow(msg.Index)
 	case UpdateTableMsg:
 		m.refresh()
 		return m, forceUpdateTable()
@@ -42,20 +42,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 // View returns the view for the model.
-func (m Model) View() string {
+func (m Table) View() string {
 	return constants.BaseTableStyle.Render(m.table.View())
 }
 
 // refresh refreshes the table.
-func (m *Model) refresh() {
+func (m *Table) refresh() {
 	rows, columns, height := generateTableContent(m.ctx)
 	m.table.SetColumns(columns)
 	m.table.SetRows(rows)
 	m.table.SetHeight(height)
 }
 
-// New creates a new table based on the input context.
-func New(ctx *TableCtx) Model {
+// NewTable creates a new table based on the input context.
+func NewTable(ctx *TableCtx) Table {
 	rows, columns, height := generateTableContent(ctx)
 	t := tab.New(
 		tab.WithColumns(columns),
@@ -64,7 +64,7 @@ func New(ctx *TableCtx) Model {
 		tab.WithHeight(height),
 	)
 	t.SetStyles(constants.TableStyle)
-	return Model{table: t, ctx: ctx}
+	return Table{table: t, ctx: ctx}
 }
 
 // generateTableContent generates the content of the table based on the input context.

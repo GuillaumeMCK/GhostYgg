@@ -3,16 +3,14 @@ package tui
 import (
 	"GhostYgg/src/client"
 	"GhostYgg/src/tui/constants"
-	"GhostYgg/src/tui/help"
-	"GhostYgg/src/tui/table"
 	"GhostYgg/src/utils"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type Model struct {
-	table         table.Model
-	help          help.Model
+	table         Table
+	help          Help
 	selectedRow   int
 	torrentClient *client.Model
 }
@@ -27,9 +25,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		constants.WindowSize = msg
 	case TickMsg:
 		// Pass the tick message to the table. This will trigger a table update
-		m.table.Update(table.UpdateTableMsg{})
+		m.Update(UpdateTableMsg{})
 		return m, nil
-	case table.SelectedRowMsg:
+	case SelectedRowMsg:
 		m.selectedRow = msg.Index
 		return m, nil
 	case tea.KeyMsg:
@@ -44,10 +42,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		case key.Matches(msg, constants.Keys.Delete):
 			m.torrentClient.DownloadsInfos[m.selectedRow].Abort()
-			return m.table.Update(table.UpdateTableMsg{})
+			return m.Update(UpdateTableMsg{})
 		case key.Matches(msg, constants.Keys.PauseAndPlay):
 			m.torrentClient.DownloadsInfos[m.selectedRow].PauseAndPlay()
-			return m.table.Update(msg)
+			return m.Update(msg)
 		case key.Matches(msg, constants.Keys.Quit):
 			return m, tea.Quit
 		}
@@ -57,13 +55,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	return m.table.View() + m.help.View()
+	return m.View() + m.help.View()
 }
 
 func App() (tea.Model, tea.Cmd) {
 	m := Model{
-		table:         table.New(constants.TableCtx),
-		help:          help.New(),
+		table: NewTable(&TableCtx{
+			Rows:    constants.TableRows,
+			Columns: constants.TableColumns,
+			Widths:  constants.TableWidths,
+		}),
+		help:          NewHelp(),
 		selectedRow:   0,
 		torrentClient: client.New(constants.DownloadFolder, constants.TorrentFiles),
 	}
