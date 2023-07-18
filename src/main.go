@@ -5,7 +5,6 @@ import (
 	"GhostYgg/src/utils"
 	"flag"
 	"fmt"
-	"github.com/sqweek/dialog"
 	"log"
 	"os"
 	"path/filepath"
@@ -48,18 +47,15 @@ func init() {
 	}
 
 	if len(torrentFiles) == 0 {
-		// If no file is specified, show the file picker dialog
-		if dialog.Message("%s", "No client file specified. Do you want to choose a file?").YesNo() {
-			if len(torrentFiles) == 0 {
-				// Open file explorer to choose a .client file
-				filePath, err := dialog.File().Filter("Torrent files", "torrent").Load()
-				if err != nil {
-					log.Fatal(err)
-				}
-				torrentFiles = []string{filePath}
-			}
-		} else {
+		filePath, err := utils.PickFilePath("No torrent file specified. Do you want to choose a file?")
+		if err != nil {
 			torrentFiles = []string{}
+		} else {
+			torrentFiles = []string{filePath}
+		}
+	} else {
+		if err := utils.Exist(torrentFiles); err != nil {
+			log.Fatal(err)
 		}
 	}
 

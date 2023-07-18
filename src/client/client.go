@@ -15,7 +15,7 @@ type Model struct {
 	client         *torrent.Client
 }
 
-func New(downloadFolder string, files []string) *Model {
+func New(downloadFolder string, files []string) Model {
 	// Create a new configuration for the torrent client
 	clientConfig := createClientConfig(downloadFolder)
 	// Create a new torrent client
@@ -33,9 +33,11 @@ func New(downloadFolder string, files []string) *Model {
 		if err != nil {
 			downloadInfo = defaultDownloadInfos(err.Error(), i)
 			downloadInfo.SetETA(constants.Cross)
+			fmt.Println(err)
 		} else {
 			downloadInfo = defaultDownloadInfos(t.Info().Name, i)
 		}
+
 		// Start downloading the client
 		t.DownloadAll()
 		// Add the client to the constants
@@ -48,7 +50,7 @@ func New(downloadFolder string, files []string) *Model {
 		// Track download progress
 		go trackDownload(t, &downloadInfo)
 	}
-	return &Model{DownloadsInfos: downloadsInfos, client: client}
+	return Model{DownloadsInfos: downloadsInfos, client: client}
 }
 
 // trackDownload tracks the download progress of a client
@@ -82,6 +84,7 @@ func trackDownload(t *torrent.Torrent, downloadInfo *DownloadInfos) {
 
 		if downloadInfo.aborted {
 			downloadInfo.SetETA(constants.Cross)
+			t.Drop()
 		} else if downloadInfo.paused {
 			t.DisallowDataDownload()
 			downloadInfo.SetETA(constants.Paused)
@@ -91,8 +94,11 @@ func trackDownload(t *torrent.Torrent, downloadInfo *DownloadInfos) {
 
 		//commands.UpdateTorrentInfo(downloadInfo)
 
+		//println(downloadInfo.Infos.Name + " " + downloadInfo.Infos.Progress + " " + downloadInfo.Infos.Seeders + " " + downloadInfo.Infos.Leeches + " " + downloadInfo.Infos.DownloadSpeed + " " + downloadInfo.Infos.ETA)
+		//// status
+		//println("Status finished: " + strconv.FormatBool(downloadInfo.finished) + " aborted: " + strconv.FormatBool(downloadInfo.aborted) + " paused: " + strconv.FormatBool(downloadInfo.paused))
+
 		if downloadInfo.finished || downloadInfo.aborted {
-			t.Drop()
 			break
 		}
 		//time.Sleep(150 * time.Millisecond)

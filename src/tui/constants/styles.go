@@ -16,16 +16,16 @@ const (
 	BACKGROUND     = lipgloss.Color("")
 )
 
-var BaseTableStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.RoundedBorder()).
+var BaseStyle = lipgloss.NewStyle().
 	BorderBackground(BACKGROUND).
-	BorderForeground(BORDER).
-	Foreground(TEXT).
 	Background(BACKGROUND)
 
-var BaseTextStyle = lipgloss.NewStyle().Foreground(TEXT)
+var BaseHelpStyle = BaseStyle.Foreground(TEXT_HIGHLIGHT)
 
-var BaseHelpStyle = lipgloss.NewStyle().Foreground(TEXT_HIGHLIGHT)
+var BaseTableStyle = BaseStyle.
+	BorderStyle(lipgloss.RoundedBorder()).
+	BorderForeground(BORDER).
+	Foreground(TEXT)
 
 var TableStyle = tab.Styles{
 	Header: BaseTableStyle.
