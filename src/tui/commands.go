@@ -5,20 +5,12 @@ import (
 	"time"
 )
 
-type TickMsg time.Time
+type UpdateTuiMsg time.Time
 
-func doTicks() tea.Cmd {
-	return tea.Every(time.Second, func(t time.Time) tea.Msg {
-		return TickMsg(t)
+func updateTui() tea.Cmd {
+	return tea.Tick(time.Millisecond*150, func(time.Time) tea.Msg {
+		return UpdateTuiMsg{}
 	})
-}
-
-type UpdateTableMsg struct{}
-
-func forceUpdateTable() tea.Cmd {
-	return func() tea.Msg {
-		return UpdateTableMsg{}
-	}
 }
 
 type SelectedRowMsg struct {

@@ -1,5 +1,7 @@
 package client
 
+import "GhostYgg/src/tui/constants"
+
 type DownloadInfos struct {
 	Infos    Infos
 	index    int
@@ -27,6 +29,7 @@ func (d *DownloadInfos) PauseAndPlay() {
 
 func (d *DownloadInfos) Abort() {
 	d.aborted = true
+	d.SetETA(constants.Cross)
 }
 
 func (d *DownloadInfos) Index() int {

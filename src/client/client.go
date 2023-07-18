@@ -11,8 +11,9 @@ import (
 )
 
 type Model struct {
-	DownloadsInfos []*DownloadInfos
+	DownloadsQueue *[]DownloadInfos
 	client         *torrent.Client
+	files          []string
 }
 
 func New(downloadFolder string, files []string) Model {
@@ -20,41 +21,44 @@ func New(downloadFolder string, files []string) Model {
 	clientConfig := createClientConfig(downloadFolder)
 	// Create a new torrent client
 	client, err := torrent.NewClient(clientConfig)
-	downloadsInfos := make([]*DownloadInfos, 0)
+	downloadsInfos := make([]DownloadInfos, 0)
 	if err != nil {
 		log.Fatal(err)
 	}
-	// Make sure to close the client after use
-	defer client.Close()
+
+	// Create a new model
+	return Model{DownloadsQueue: &downloadsInfos, client: client, files: files}
+}
+
+func (m Model) Start() error {
 	// Add the client files to the client
-	for i, file := range files {
+	for i, file := range m.files {
 		var downloadInfo DownloadInfos
-		t, err := client.AddTorrentFromFile(file)
+		t, err := m.client.AddTorrentFromFile(file)
 		if err != nil {
 			downloadInfo = defaultDownloadInfos(err.Error(), i)
-			downloadInfo.SetETA(constants.Cross)
-			fmt.Println(err)
+			downloadInfo.Abort()
 		} else {
 			downloadInfo = defaultDownloadInfos(t.Info().Name, i)
 		}
+		// Add download info to the queue
+		*m.DownloadsQueue = append(*m.DownloadsQueue, downloadInfo)
 
 		// Start downloading the client
 		t.DownloadAll()
-		// Add the client to the constants
-		//commands.UpdateTorrentInfo(&downloadInfo)
-		downloadsInfos = append(downloadsInfos, &downloadInfo)
+
 		// If the download failed, skip the rest
 		if err != nil {
 			continue // Skip the rest
 		}
 		// Track download progress
-		go trackDownload(t, &downloadInfo)
+		go m.trackDownload(t, &downloadInfo)
 	}
-	return Model{DownloadsInfos: downloadsInfos, client: client}
+	return nil
 }
 
 // trackDownload tracks the download progress of a client
-func trackDownload(t *torrent.Torrent, downloadInfo *DownloadInfos) {
+func (m Model) trackDownload(t *torrent.Torrent, downloadInfo *DownloadInfos) {
 	// Wait for the client to get info
 	<-t.GotInfo()
 	// Define variables
@@ -73,7 +77,7 @@ func trackDownload(t *torrent.Torrent, downloadInfo *DownloadInfos) {
 				Name:          name,
 				Progress:      utils.FormatBytesProgress(bytesCompleted, totalLength),
 				Seeders:       strconv.Itoa(t.Stats().ConnectedSeeders),
-				Leeches:       strconv.Itoa(t.Stats().ActivePeers - t.Stats().ConnectedSeeders),
+				Leechers:      strconv.Itoa(t.Stats().ActivePeers - t.Stats().ConnectedSeeders),
 				DownloadSpeed: fmt.Sprintf("%.2fMB/s", downloadRate),
 				ETA:           utils.FormatDuration(calculateETA(remainingBytes, downloadRate)),
 			}
@@ -91,17 +95,10 @@ func trackDownload(t *torrent.Torrent, downloadInfo *DownloadInfos) {
 		} else {
 			t.AllowDataDownload()
 		}
-
-		//commands.UpdateTorrentInfo(downloadInfo)
-
-		//println(downloadInfo.Infos.Name + " " + downloadInfo.Infos.Progress + " " + downloadInfo.Infos.Seeders + " " + downloadInfo.Infos.Leeches + " " + downloadInfo.Infos.DownloadSpeed + " " + downloadInfo.Infos.ETA)
-		//// status
-		//println("Status finished: " + strconv.FormatBool(downloadInfo.finished) + " aborted: " + strconv.FormatBool(downloadInfo.aborted) + " paused: " + strconv.FormatBool(downloadInfo.paused))
-
 		if downloadInfo.finished || downloadInfo.aborted {
 			break
 		}
-		//time.Sleep(150 * time.Millisecond)
+		time.Sleep(350 * time.Millisecond)
 	}
 }
 
@@ -118,7 +115,7 @@ func calculateETA(remainingBytes int64, downloadRate float64) time.Duration {
 
 // Abort all downloads
 func (m *Model) Abort() {
-	for _, downloadInfo := range m.DownloadsInfos {
+	for _, downloadInfo := range *m.DownloadsQueue {
 		downloadInfo.Abort()
 	}
 }

@@ -10,23 +10,27 @@ import (
 
 type Model struct {
 	table         Table
+	tableCtx      TableCtx
 	help          Help
 	selectedRow   int
 	torrentClient client.Model
 }
 
 func (m Model) Init() tea.Cmd {
-	return tea.Batch(doTicks())
+	return updateTui()
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		//println(msg.Width, msg.Height)
-		constants.WindowSize = msg
-	case TickMsg:
-		// Pass the tick message to the table. This will trigger a table update
-		m.Update(UpdateTableMsg{})
+	case UpdateTuiMsg, tea.WindowSizeMsg:
+		cmds := []tea.Cmd{updateTui()}
+		if msg, ok := msg.(tea.WindowSizeMsg); ok {
+			constants.WindowSize = msg
+			cmds = append(cmds, tea.ClearScreen)
+		}
+		m.tableCtx.Rows = *m.torrentClient.DownloadsQueue
+		m.table.Update(cmds)
+		return m, tea.Batch(cmds...)
 	case SelectedRowMsg:
 		m.selectedRow = msg.Index
 		return m, nil
@@ -41,12 +45,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			utils.OpenDirectory(constants.DownloadFolder)
 			return m, nil
 		case key.Matches(msg, constants.Keys.Delete):
-			m.torrentClient.DownloadsInfos[m.selectedRow].Abort()
-			return m.Update(UpdateTableMsg{})
+			(*m.torrentClient.DownloadsQueue)[m.selectedRow].Abort()
+			return m.Update(UpdateTuiMsg{})
 		case key.Matches(msg, constants.Keys.PauseAndPlay):
-			m.torrentClient.DownloadsInfos[m.selectedRow].PauseAndPlay()
+			(*m.torrentClient.DownloadsQueue)[m.selectedRow].PauseAndPlay()
 			return m.Update(msg)
 		case key.Matches(msg, constants.Keys.Quit):
+			m.torrentClient.Abort()
 			return m, tea.Quit
 		}
 	}
@@ -58,17 +63,22 @@ func (m Model) View() string {
 	return m.table.View() + "\n" + m.help.View()
 }
 
-func App() (tea.Model, tea.Cmd) {
+func New(torrentFiles []string) (tea.Model, tea.Cmd) {
+	torrentClient := client.New(constants.DownloadFolder, torrentFiles)
+	err := torrentClient.Start()
+	if err != nil {
+		panic("error starting torrent client")
+	}
 
 	m := Model{
 		table: NewTable(&TableCtx{
-			Rows:    constants.TableRows,
+			Rows:    make([]client.DownloadInfos, 0),
 			Columns: constants.TableColumns,
 			Widths:  constants.TableWidths,
 		}),
 		help:          NewHelp(),
 		selectedRow:   0,
-		torrentClient: client.New(constants.DownloadFolder, constants.TorrentFiles),
+		torrentClient: torrentClient,
 	}
 	return m, nil
 }

@@ -17,41 +17,41 @@ type KeyMap struct {
 // Keys reusable key mappings shared across models
 var Keys = KeyMap{
 	Open: key.NewBinding(
-		key.WithKeys("o", "enter"),
-		key.WithHelp("o/enter", "open download folder"),
+		key.WithKeys("o"),
+		key.WithHelp("[o]", "open folder"),
 	),
 	Add: key.NewBinding(
 		key.WithKeys("a"),
-		key.WithHelp("a", "add torrent to client"),
+		key.WithHelp("[a]", "add torrent"),
 	),
 	Delete: key.NewBinding(
 		key.WithKeys("d"),
-		key.WithHelp("d", "delete torrent from client"),
+		key.WithHelp("[d]", "delete torrent"),
 	),
 	PauseAndPlay: key.NewBinding(
 		key.WithKeys("space"),
-		key.WithHelp("space", "pause/play a torrent"),
+		key.WithHelp("[ ]", "pause/play"),
 	),
 	Quit: key.NewBinding(
-		key.WithKeys("ctrl+c", "q", "esc"),
-		key.WithHelp("ctrl+c/q/esc", "quit"),
+		key.WithKeys("ctrl+c", "q"),
+		key.WithHelp("[ctrl+c] [q]", "quit"),
 	),
 	Up: key.NewBinding(
 		key.WithKeys("up"),
-		key.WithHelp("↑", "move the cursor up"),
+		key.WithHelp("[↑]", "move up"),
 	),
 	Down: key.NewBinding(
 		key.WithKeys("down"),
-		key.WithHelp("↓", "move the cursor down"),
+		key.WithHelp("[↓]", "move down"),
 	),
 	Help: key.NewBinding(
 		key.WithKeys("?"),
-		key.WithHelp("?", "toggle help"),
+		key.WithHelp("[?]", "help"),
 	),
 }
 
 func (k KeyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Open, k.Add, k.Delete, k.PauseAndPlay, k.Quit}
+	return []key.Binding{k.Help, k.Quit, k.Add, k.Delete, k.PauseAndPlay}
 }
 
 func (k KeyMap) FullHelp() [][]key.Binding {
