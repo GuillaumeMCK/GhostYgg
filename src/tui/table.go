@@ -37,6 +37,7 @@ func (m Table) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case SelectedRowMsg:
 		return m, selectedRow(msg.Index)
 	}
+	m.table.Update(msg)
 	return m, cmd
 }
 

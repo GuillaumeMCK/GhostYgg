@@ -10,7 +10,6 @@ import (
 
 type Model struct {
 	table         Table
-	tableCtx      TableCtx
 	help          Help
 	selectedRow   int
 	torrentClient client.Model
@@ -22,15 +21,16 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
+
 	switch msg := msg.(type) {
 	case UpdateTuiLoopMsg, tea.WindowSizeMsg:
-		if _, ok := msg.(tea.WindowSizeMsg); ok {
-			constants.WindowSize = msg.(tea.WindowSizeMsg)
+		if winSize, ok := msg.(tea.WindowSizeMsg); ok {
+			constants.WindowSize = winSize
 			cmd = tea.ClearScreen
 		}
 		return m, tea.Batch(cmd, updateTable(), updateTuiLoop())
 	case UpdateTableMsg:
-		m.tableCtx.Rows = *m.torrentClient.DownloadsQueue
+		m.table.ctx.Rows = *m.torrentClient.DownloadsQueue
 		m.table.refresh()
 		return m, cmd
 	case SelectedRowMsg:
@@ -58,6 +58,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
+	m.table.Update(msg)
 	return m, cmd
 }
 
@@ -82,13 +83,6 @@ func New(torrentFiles []string) (tea.Model, tea.Cmd) {
 		selectedRow:   0,
 		torrentClient: torrentClient,
 	}
-	//
-	//go func() {
-	//	for {
-	//		m.Update(UpdateTuiMsg{})
-	//		time.Sleep(1 * time.Second)
-	//	}
-	//}()
 
 	return m, nil
 }
