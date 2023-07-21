@@ -23,21 +23,20 @@ type TableCtx struct {
 
 // Init initializes the table on creation.
 func (m Table) Init() tea.Cmd {
-	m.refresh()
-	return updateTui()
+	return nil
 }
 
 // Update handles the update messages for the model.
 func (m Table) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
+	m.refresh()
 	switch msg := msg.(type) {
-	case UpdateTuiMsg, tea.WindowSizeMsg:
+	case UpdateTableMsg:
 		m.refresh()
-		return m, updateTui()
+		return m, cmd
 	case SelectedRowMsg:
 		return m, selectedRow(msg.Index)
 	}
-	m.table, cmd = m.table.Update(msg)
 	return m, cmd
 }
 
@@ -69,8 +68,8 @@ func NewTable(ctx *TableCtx) Table {
 
 // generateTableContent generates the content of the table based on the input context.
 func generateTableContent(ctx *TableCtx) ([]table.Row, []table.Column, int) {
-	height := constants.WindowSize.Height - 4
-	width := constants.WindowSize.Width - 2
+	height := constants.WindowSize.Height - (4 + constants.HelpHeight)
+	width := constants.WindowSize.Width - 4
 
 	columns := createColumns(ctx.Columns, ctx.Widths, width)
 	rows := createRows(ctx.Rows)

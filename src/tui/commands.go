@@ -5,12 +5,20 @@ import (
 	"time"
 )
 
-type UpdateTuiMsg time.Time
+type UpdateTuiLoopMsg struct{}
 
-func updateTui() tea.Cmd {
-	return tea.Tick(time.Millisecond*150, func(time.Time) tea.Msg {
-		return UpdateTuiMsg{}
+func updateTuiLoop() tea.Cmd {
+	return tea.Every(time.Millisecond*150, func(time.Time) tea.Msg {
+		return UpdateTuiLoopMsg{}
 	})
+}
+
+type UpdateTableMsg struct{}
+
+func updateTable() tea.Cmd {
+	return func() tea.Msg {
+		return UpdateTableMsg{}
+	}
 }
 
 type SelectedRowMsg struct {
@@ -21,8 +29,4 @@ func selectedRow(index int) tea.Cmd {
 	return func() tea.Msg {
 		return SelectedRowMsg{Index: index}
 	}
-}
-
-type UpdateHeightMsg struct {
-	Height int
 }

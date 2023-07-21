@@ -17,28 +17,30 @@ type Model struct {
 }
 
 func (m Model) Init() tea.Cmd {
-	return updateTui()
+	return updateTuiLoop()
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
 	switch msg := msg.(type) {
-	case UpdateTuiMsg, tea.WindowSizeMsg:
-		cmds := []tea.Cmd{updateTui()}
-		if msg, ok := msg.(tea.WindowSizeMsg); ok {
-			constants.WindowSize = msg
-			cmds = append(cmds, tea.ClearScreen)
+	case UpdateTuiLoopMsg, tea.WindowSizeMsg:
+		if _, ok := msg.(tea.WindowSizeMsg); ok {
+			constants.WindowSize = msg.(tea.WindowSizeMsg)
+			cmd = tea.ClearScreen
 		}
+		return m, tea.Batch(cmd, updateTable(), updateTuiLoop())
+	case UpdateTableMsg:
 		m.tableCtx.Rows = *m.torrentClient.DownloadsQueue
-		m.table.Update(cmds)
-		return m, tea.Batch(cmds...)
+		m.table.refresh()
+		return m, cmd
 	case SelectedRowMsg:
 		m.selectedRow = msg.Index
 		return m, nil
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, constants.Keys.Help):
-			m.help.Update(msg)
-			return m, nil
+			m.help.switchHelp()
+			return m, updateTable()
 		//case key.Matches(msg, constants.Keys.Add):
 		//	// TODO: add a new download. use sqweek/dialog.go lib to pick a file
 		case key.Matches(msg, constants.Keys.Open):
@@ -46,7 +48,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		case key.Matches(msg, constants.Keys.Delete):
 			(*m.torrentClient.DownloadsQueue)[m.selectedRow].Abort()
-			return m.Update(UpdateTuiMsg{})
+			return m, nil
 		case key.Matches(msg, constants.Keys.PauseAndPlay):
 			(*m.torrentClient.DownloadsQueue)[m.selectedRow].PauseAndPlay()
 			return m.Update(msg)
@@ -56,7 +58,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	return m, nil
+	return m, cmd
 }
 
 func (m Model) View() string {
@@ -80,5 +82,13 @@ func New(torrentFiles []string) (tea.Model, tea.Cmd) {
 		selectedRow:   0,
 		torrentClient: torrentClient,
 	}
+	//
+	//go func() {
+	//	for {
+	//		m.Update(UpdateTuiMsg{})
+	//		time.Sleep(1 * time.Second)
+	//	}
+	//}()
+
 	return m, nil
 }
