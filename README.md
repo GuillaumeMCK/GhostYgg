@@ -18,6 +18,7 @@
                                                                          ▀██████████████████████████████████████████████▀   
                                                                             ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀      
 ```
+
 [//]: # (<div align="center" style="margin-bottom: 20px; flex-direction: row;">)
 
 [//]: # (  <img src="https://i.imgur.com/0Q8Z3ZM.png" alt="GhostYgg screenshots">)
@@ -26,7 +27,8 @@
 
 [//]: # (</div>)
 
-> Made with ☕ for fun. GhostYgg is a simple command-line tool for downloading torrents without seeding & increase download rate.
+> Made with ☕ for fun. GhostYgg is a simple command-line tool for downloading torrents without seeding & increase
+> download rate.
 
 ## Usage
 
@@ -36,36 +38,25 @@ To use GhostYgg, open a terminal or command prompt and execute the following com
 $ GhostYgg file1.client file2.client ... [options]
 ```
 
-<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
-
-<div>
-
-| Shortcut      | Action      |
-|---------------|-------------|
-| `[o]`         | Open Folder |
-| `[↑]`         | Move Up     |
-| `[a]`         | Add Torrent |
-| `[↓]`         | Move Down   |
-| `[backspace]` | Delete      |
-| `[?]`         | Help        |
-| `[ ]`         | Pause/Play  |
-| `[ctrl+c]`    | Quit        |
-| `[q]`         | Quit        |
-
-</div>
-
-<div>
-
-GhostYgg supports the following options:
+### Options:
 
 - `-output`: Specifies the download directory.
 - `-help`: Displays the help message.
 
-</div>
-
 **Note**: Dragging and dropping torrent files onto the executable is supported only on Windows for now.
 
-</div>
+### Controls:
+
+| Shortcut                       | Action      |
+|--------------------------------|-------------|
+| <kbd>o</kbd>                   | Open Folder |
+| <kbd>a</kbd>                   | Add Torrent |
+| <kbd>space</kbd>               | Pause/Play  |
+| <kbd>↑</kbd>                   | Move Up     |
+| <kbd>↓</kbd>                   | Move Down   |
+| <kbd>backspace</kbd>           | Delete      |
+| <kbd>?</kbd>                   | Help        |
+| <kbd>ctrl+c</kbd> <kbd>q</kbd> | Quit        |
 
 ## Installation
 
