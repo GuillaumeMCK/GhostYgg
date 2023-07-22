@@ -33,6 +33,8 @@ func (d *TorrentInfos) PauseAndPlay() {
 	d.paused = !d.paused
 	if d.paused && !d.finished && !d.aborted {
 		d.SetETA(constants.Paused)
+	} else if !d.paused {
+		d.SetETA(constants.Play)
 	}
 }
 

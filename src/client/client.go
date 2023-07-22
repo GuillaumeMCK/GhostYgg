@@ -72,7 +72,6 @@ func (m *Model) AddTorrent(path string) error {
 // trackTorrent tracks the download progress of a client.
 func (m *Model) trackTorrent(t *torrent.Torrent, index int) {
 	<-t.GotInfo()
-	pcs := t.SubscribePieceStateChanges()
 
 	name := t.Info().Name
 	startTime := time.Now()
@@ -83,6 +82,22 @@ func (m *Model) trackTorrent(t *torrent.Torrent, index int) {
 		bytesCompleted := t.BytesCompleted()
 		totalLength := t.Info().TotalLength()
 		elapsedTime := time.Since(startTime)
+
+		if torrentInfos.aborted || torrentInfos.paused {
+			if !torrentInfos.dropped {
+				t.Drop()
+				torrentInfos.dropped = true
+			}
+		} else if bytesCompleted >= totalLength {
+			torrentInfos.finished = true
+			torrentInfos.SetETA(constants.Validated)
+		} else if torrentInfos.dropped && !torrentInfos.paused {
+			t, _ = m.client.AddTorrentFromFile(torrentInfos.path)
+			t.DownloadAll()
+			startSize = t.BytesCompleted()
+			startTime = time.Now()
+			torrentInfos.dropped = false
+		}
 
 		if bytesCompleted < totalLength &&
 			!torrentInfos.finished &&
@@ -100,29 +115,13 @@ func (m *Model) trackTorrent(t *torrent.Torrent, index int) {
 			}
 		}
 
-		if torrentInfos.aborted || torrentInfos.paused {
-			if !torrentInfos.dropped {
-				t.Drop()
-				torrentInfos.dropped = true
-			}
-		} else if bytesCompleted >= totalLength {
-			torrentInfos.finished = true
-			torrentInfos.SetETA(constants.Validated)
-		} else {
-			if torrentInfos.dropped {
-				t, _ = m.client.AddTorrentFromFile(torrentInfos.path)
-				t.DownloadAll()
-				torrentInfos.dropped = false
-			}
-		}
-
 		// Write the torrent infos to the model
 		(*m.Torrents)[index] = torrentInfos
 
 		if torrentInfos.finished || torrentInfos.aborted {
 			break
 		}
-		<-pcs.Values
+		time.Sleep(150 * time.Millisecond)
 	}
 }
 
