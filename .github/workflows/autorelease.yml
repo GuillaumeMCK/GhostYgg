@@ -9,7 +9,6 @@ on:
 jobs:
   release-build:
     name: Release Build
-    if: startsWith( github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
