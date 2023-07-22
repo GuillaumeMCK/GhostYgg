@@ -1,34 +1,35 @@
+# GhostYgg
+
 [![Build Status](https://travis-ci.com/GuillaumeMCK/GhostYgg.svg?branch=main)](https://travis-ci.com/GuillaumeMCK/GhostYgg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/GuillaumeMCK/GhostYgg)](https://goreportcard.com/report/github.com/GuillaumeMCK/GhostYgg)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Release](https://img.shields.io/github/release/GuillaumeMCK/GhostYgg.svg)](https://github.com/GuillaumeMCK/GhostYgg/releases)
 
+<div align="center">
+
 ```
-                                                                           ▄▄███████████████████████████████████████▄       
-                                                                         ▄█████████████████████████████████████████████▄    
-     ▄▄▄▓▄▄▄      ▄███▄                                                 ████▀   ▀██████▀         █▌    ██▀    ▀█▀   █████▄  
-   ███████████▓   ████▌                                    ▐████      ▄██████▄    ████                              ▓██████ 
- ▄█████▀▀▀▀█████▄ ████▌▄▄▄▄▄▄      ▄▄▄█▄▄▄      ▄▄▄█▄▄▄▄  ▄██████▄▄  ▐████████▄    ██        █████▄       ▐█████    ▓███████
-▐█████      ▀▀▀▀  ████████████▄  ▓██████████  ▓██████████▒████████▌     ▄██████▌             █████▌       ██████    ▓██████ 
-▐████░   ███████▌▐█████▀ ▐█████ █████   █████ █████▄▄▓██▀  █████▒      ██████████      ▄█     ▀█▌▀          ██▌     ▓████▀  
-▐████▒   ████████░████▌   ▓████▐████▌   ▐████ ▀█████████▄  ▓████     ▄███████████▀    ████▄            █▄           ▓███    
- █████▄    ▄████▌ ████▌   ▓████ █████   █████▒▄▄▄▒▀▀█████▌ ▓████▒    ███████████     █████████████▌    █████████    ████████
-  █████████████▌  ████▌   ▓████  ███████████▀ ███████████░ ▐██████▌   █████████     █████     ▀▀▀          ▀▀▀      ███████ 
-    ▀████████▀    ▀███▀   ▀███▀   ▐▀██████▀    ▀███████▀     ▀████▀    ▀██████     ███████▄         ▄███▄        ▄████████  
-                                                                         ▀██████████████████████████████████████████████▀   
-                                                                            ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀      
+╭───────────────────────────────────────────────────────────────────────────────────╮
+│ Name                             Progress     Seeder…  Leech…  Download …  ETA    │
+│───────────────────────────────────────────────────────────────────────────────────│
+│ Dave the Diver                   0.3/1.8GB    21       0       86.97MB/s   00:01… │
+│ Kali Linux 2020.4                                                          ✓      │
+│                                                                                   │
+│                                                                                   │
+│                                                                                   │
+│                                                                                   │
+│                                                                                   │
+│                                                                                   │
+│                                                                                   │
+│                                                                                   │
+│                                                                                   │
+╰───────────────────────────────────────────────────────────────────────────────────╯
+ [?] help • [ctrl+c] [q] quit • [a] add torrent • [backspace] delete • [ ] pause/play 
 ```
 
-[//]: # (<div align="center" style="margin-bottom: 20px; flex-direction: row;">)
+</div>
 
-[//]: # (  <img src="https://i.imgur.com/0Q8Z3ZM.png" alt="GhostYgg screenshots">)
-
-[//]: # (   <p><b></b></p> )
-
-[//]: # (</div>)
-
-> Made with ☕ for fun. GhostYgg is a simple command-line tool for downloading torrents without seeding & increase
-> download rate.
+> Made with ☕ for fun. <br>
+> GhostYgg is a simple command-line tool for downloading torrents without seeding & increase download rate.
 
 ## Usage
 
@@ -38,12 +39,18 @@ To use GhostYgg, open a terminal or command prompt and execute the following com
 $ GhostYgg file1.client file2.client ... [options]
 ```
 
+> **Note**: Dragging and dropping torrent files onto the executable is supported only on Windows for now.
+
 ### Options:
 
 - `-output`: Specifies the download directory.
 - `-help`: Displays the help message.
 
-**Note**: Dragging and dropping torrent files onto the executable is supported only on Windows for now.
+If no download directory is specified using the `-output` flag, the tool will use the default download folder of your
+operating system.
+
+- On Linux & macOS: `/home/<YourUsername>/Downloads`
+- On Windows: `C:\Users\<YourUsername>\Downloads`
 
 ### Controls:
 
@@ -88,14 +95,6 @@ To get started with GhostYgg, follow these steps:
    ```bash
    $ ./GhostYgg file1.client file2.client ...
    ```
-
-## Default Download Folder
-
-If no download directory is specified using the `-output` flag, the tool will use the default download folder of your
-operating system.
-
-- On Linux & macOS: `/home/<YourUsername>/Downloads`
-- On Windows: `C:\Users\<YourUsername>\Downloads`
 
 ## Contributing
 
