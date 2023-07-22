@@ -47,7 +47,7 @@ func init() {
 	}
 
 	if len(torrentFiles) == 0 {
-		filePath, err := utils.PickFilePath("No torrent file specified. Do you want to choose a file?")
+		filePath, err := utils.PickTorrentFilePath("No torrent file specified. Do you want to choose a file?")
 		if err != nil {
 			torrentFiles = []string{}
 		} else {
