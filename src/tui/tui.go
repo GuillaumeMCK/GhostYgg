@@ -13,7 +13,7 @@ import (
 type TUI struct {
 	table         *Table
 	help          *Help
-	torrentClient client.Model
+	torrentClient *client.Model
 }
 
 // Init initializes the TUI model and returns a command to execute during the initialization.
@@ -33,7 +33,7 @@ func (m TUI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, tea.Batch(cmd, updateTable(), updateTuiLoop())
 	case UpdateTableMsg:
-		m.table.refresh(*m.torrentClient.Downloads)
+		m.table.refresh(*m.torrentClient.Torrents)
 		return m, nil
 	case tea.KeyMsg:
 		switch {
@@ -46,10 +46,10 @@ func (m TUI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			utils.OpenDirectory(constants.DownloadFolder)
 			return m, nil
 		case key.Matches(msg, constants.Keys.Delete):
-			(*m.torrentClient.Downloads)[m.table.selectedRow()].Abort()
+			(*m.torrentClient.Torrents)[m.table.selectedRow()].Abort()
 			return m, nil
 		case key.Matches(msg, constants.Keys.PauseAndPlay):
-			(*m.torrentClient.Downloads)[m.table.selectedRow()].PauseAndPlay()
+			(*m.torrentClient.Torrents)[m.table.selectedRow()].PauseAndPlay()
 			return m, nil
 		case key.Matches(msg, constants.Keys.Quit):
 			m.torrentClient.Abort()
@@ -67,7 +67,8 @@ func (m TUI) View() string {
 
 // NewTUI creates a new TUI model.
 func NewTUI(torrentFiles []string) (tea.Model, tea.Cmd) {
-	torrentClient := client.New(constants.DownloadFolder, torrentFiles)
+	torrentClient, _ := client.New(constants.DownloadFolder, torrentFiles)
+
 	err := torrentClient.Start()
 	if err != nil {
 		panic("error starting torrent client")
@@ -75,7 +76,7 @@ func NewTUI(torrentFiles []string) (tea.Model, tea.Cmd) {
 
 	m := TUI{
 		table: NewTable(&TableCtx{
-			Rows:    make([]client.DownloadInfos, 0),
+			Rows:    make([]client.TorrentInfos, 0),
 			Columns: constants.TableColumns,
 			Widths:  constants.TableWidths,
 		}),

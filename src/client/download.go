@@ -1,42 +1,48 @@
 package client
 
-import "GhostYgg/src/tui/constants"
+import (
+	"GhostYgg/src/tui/constants"
+)
 
-type DownloadInfos struct {
+type TorrentInfos struct {
 	Infos    Infos
 	index    int
 	finished bool
 	paused   bool
 	aborted  bool
+	dropped  bool
+	path     string
 }
 
-func defaultDownloadInfos(name string, index int) DownloadInfos {
-	return DownloadInfos{
+func defaultTorrentInfos(name string, index int, path string) TorrentInfos {
+	return TorrentInfos{
 		Infos:    defaultInfos(name),
 		index:    index,
 		finished: false,
 		paused:   false,
 		aborted:  false,
+		dropped:  false,
+		path:     path,
 	}
 }
-func (d *DownloadInfos) SetETA(eta string) {
+func (d *TorrentInfos) SetETA(eta string) {
 	d.Infos.ETA = eta
 }
 
-func (d *DownloadInfos) PauseAndPlay() {
+func (d *TorrentInfos) PauseAndPlay() {
 	d.paused = !d.paused
 	if d.paused && !d.finished && !d.aborted {
 		d.SetETA(constants.Paused)
 	}
 }
 
-func (d *DownloadInfos) Abort() {
+func (d *TorrentInfos) Abort() {
 	d.aborted = true
 	if !d.finished {
 		d.SetETA(constants.Cross)
 	}
 }
 
-func (d *DownloadInfos) Index() int {
+func (d *TorrentInfos) Idx() int {
 	return d.index
 }

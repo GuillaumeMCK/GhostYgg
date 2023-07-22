@@ -5,128 +5,144 @@ import (
 	"GhostYgg/src/utils"
 	"fmt"
 	"github.com/anacrolix/torrent"
-	"log"
 	"strconv"
 	"time"
 )
 
+// Constants
+const (
+	megabyte           = 1024 * 1024
+	torrentSpeedFormat = "%.2fMB/s"
+)
+
 // Model represents the torrent client model.
 type Model struct {
-	Downloads *[]DownloadInfos
-	client    *torrent.Client
-	files     []string
+	Torrents *[]TorrentInfos
+	client   *torrent.Client
+	files    []string
 }
 
 // New creates a new torrent client model.
-func New(downloadFolder string, files []string) Model {
+func New(downloadFolder string, files []string) (*Model, error) {
 	// Create a new configuration for the torrent client
 	clientConfig := createClientConfig(downloadFolder)
-
 	// Create a new torrent client
 	client, err := torrent.NewClient(clientConfig)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-
-	downloadsInfos := make([]DownloadInfos, 0)
-
+	TorrentsInfos := make([]TorrentInfos, 0)
 	// Create a new model
-	return Model{Downloads: &downloadsInfos, client: client, files: files}
+	return &Model{Torrents: &TorrentsInfos, client: client, files: files}, nil
 }
 
 // Start starts the download process for the client.
-func (m Model) Start() error {
-	// Add the client files to the client
-	for i, file := range m.files {
-		var downloadInfo DownloadInfos
-		t, err := m.client.AddTorrentFromFile(file)
-		if err != nil {
-			downloadInfo = defaultDownloadInfos(err.Error(), i)
-			downloadInfo.Abort()
-		} else {
-			downloadInfo = defaultDownloadInfos(t.Info().Name, i)
-		}
-		// Add download info to the queue
-		*m.Downloads = append(*m.Downloads, downloadInfo)
-
-		// Start downloading the client
-		t.DownloadAll()
-
-		// If the download failed, skip the rest
-		if err != nil {
-			continue // Skip the rest
-		}
-		// Track download progress. Take downloadInfo as a pointer from the queue with the index i
-		go m.trackDownload(t, &(*m.Downloads)[i])
+func (m *Model) Start() error {
+	for _, file := range m.files {
+		m.AddTorrent(file)
 	}
 	return nil
 }
 
-// trackDownload tracks the download progress of a client.
-func (m Model) trackDownload(t *torrent.Torrent, downloadInfo *DownloadInfos) {
+// AddTorrent adds a new torrent infos to the model.
+func (m *Model) AddTorrent(path string) error {
+	var torrentInfos TorrentInfos
+	var lenght int = len(*m.Torrents)
+
+	t, err := m.client.AddTorrentFromFile(path)
+	if err != nil {
+		torrentInfos = defaultTorrentInfos(err.Error(), lenght, path)
+		torrentInfos.Abort()
+	} else {
+		torrentInfos = defaultTorrentInfos(t.Info().Name, lenght, path)
+
+	}
+	// Add the torrent infos to the model
+	*m.Torrents = append(*m.Torrents, torrentInfos)
+
+	// Start downloading the client
+	t.DownloadAll()
+
+	// Start tracking the torrent
+	go m.trackTorrent(t, lenght)
+
+	return nil
+}
+
+// trackTorrent tracks the download progress of a client.
+func (m *Model) trackTorrent(t *torrent.Torrent, index int) {
 	<-t.GotInfo()
+	pcs := t.SubscribePieceStateChanges()
 
 	name := t.Info().Name
 	startTime := time.Now()
 	startSize := t.BytesCompleted()
+
 	for {
+		torrentInfos := (*m.Torrents)[index]
 		bytesCompleted := t.BytesCompleted()
 		totalLength := t.Info().TotalLength()
 		elapsedTime := time.Since(startTime)
 
-		if bytesCompleted < totalLength {
+		if bytesCompleted < totalLength &&
+			!torrentInfos.finished &&
+			!torrentInfos.aborted &&
+			!torrentInfos.paused {
 			remainingBytes := totalLength - bytesCompleted
 			downloadRate := calculateDownloadRate(bytesCompleted, startSize, elapsedTime)
-			downloadInfo.Infos = Infos{
-				Name:          name,
-				Progress:      utils.FormatBytesProgress(bytesCompleted, totalLength),
-				Seeders:       strconv.Itoa(t.Stats().ConnectedSeeders),
-				Leechers:      strconv.Itoa(t.Stats().ActivePeers - t.Stats().ConnectedSeeders),
-				DownloadSpeed: fmt.Sprintf("%.2fMB/s", downloadRate),
-				ETA:           utils.FormatDuration(calculateETA(remainingBytes, downloadRate)),
+			torrentInfos.Infos = Infos{
+				Name:         name,
+				Progress:     utils.FormatBytesProgress(bytesCompleted, totalLength),
+				Seeders:      strconv.Itoa(t.Stats().ConnectedSeeders),
+				Leechers:     strconv.Itoa(t.Stats().ActivePeers - t.Stats().ConnectedSeeders),
+				Torrentspeed: fmt.Sprintf(torrentSpeedFormat, downloadRate),
+				ETA:          utils.FormatDuration(calculateETA(remainingBytes, downloadRate)),
 			}
-		} else {
-			downloadInfo.finished = true
-			downloadInfo.SetETA(constants.Validated)
 		}
 
-		if downloadInfo.aborted {
-			downloadInfo.SetETA(constants.Cross)
-			t.Drop()
-		} else if downloadInfo.paused {
-			t.Drop()
-			downloadInfo.SetETA(constants.Paused)
+		if torrentInfos.aborted || torrentInfos.paused {
+			if !torrentInfos.dropped {
+				t.Drop()
+				torrentInfos.dropped = true
+			}
+		} else if bytesCompleted >= totalLength {
+			torrentInfos.finished = true
+			torrentInfos.SetETA(constants.Validated)
 		} else {
-			t.DownloadAll()
+			if torrentInfos.dropped {
+				t, _ = m.client.AddTorrentFromFile(torrentInfos.path)
+				t.DownloadAll()
+				torrentInfos.dropped = false
+			}
 		}
 
-		// write the download info to the queue
-		(*m.Downloads)[downloadInfo.Index()] = *downloadInfo
+		// Write the torrent infos to the model
+		(*m.Torrents)[index] = torrentInfos
 
-		if downloadInfo.finished || downloadInfo.aborted {
+		if torrentInfos.finished || torrentInfos.aborted {
 			break
 		}
-		time.Sleep(150 * time.Millisecond)
+		<-pcs.Values
 	}
 }
 
 // calculateDownloadRate calculates the download rate in MB/s.
 func calculateDownloadRate(bytesCompleted, startSize int64, elapsedTime time.Duration) float64 {
-	return float64(bytesCompleted-startSize) / elapsedTime.Seconds() / 1024 / 1024
+	return float64(bytesCompleted-startSize) / elapsedTime.Seconds() / megabyte
 }
 
 // calculateETA calculates the estimated time of arrival for the download completion.
 func calculateETA(remainingBytes int64, downloadRate float64) time.Duration {
 	if downloadRate > 0 {
-		return time.Duration(int64(float64(remainingBytes) / downloadRate / 1024 / 1024))
+		return time.Duration(float64(remainingBytes)/downloadRate) / megabyte
 	}
 	return time.Duration(0)
 }
 
-// Abort aborts all downloads in the client model.
+// Abort aborts all Torrents in the client model.
 func (m *Model) Abort() {
-	for _, downloadInfo := range *m.Downloads {
-		downloadInfo.Abort()
+	for _, torrentInfos := range *m.Torrents {
+		torrentInfos.Abort()
 	}
 }
 

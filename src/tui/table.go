@@ -17,7 +17,7 @@ type Table struct {
 // TableCtx represents the context of the table.
 type TableCtx struct {
 	Columns [6]string
-	Rows    []client.DownloadInfos
+	Rows    []client.TorrentInfos
 	Widths  [6]float32
 }
 
@@ -45,7 +45,7 @@ func (m Table) View() string {
 }
 
 // refresh refreshes the table with new rows (if provided).
-func (m *Table) refresh(newRows ...[]client.DownloadInfos) {
+func (m *Table) refresh(newRows ...[]client.TorrentInfos) {
 	if len(newRows) > 0 {
 		m.ctx.Rows = newRows[0]
 	}
@@ -114,10 +114,10 @@ func createColumns(columnNames [6]string, widths [6]float32, screenWidth int) []
 }
 
 // createRows creates rows based on the input rows.
-func createRows(downloads []client.DownloadInfos) []table.Row {
+func createRows(Torrents []client.TorrentInfos) []table.Row {
 	rows := make([]table.Row, 0)
-	for _, row := range downloads {
-		rows = append(rows, table.Row{row.Infos.Name, row.Infos.Progress, row.Infos.Seeders, row.Infos.Leechers, row.Infos.DownloadSpeed, row.Infos.ETA})
+	for _, row := range Torrents {
+		rows = append(rows, table.Row{row.Infos.Name, row.Infos.Progress, row.Infos.Seeders, row.Infos.Leechers, row.Infos.Torrentspeed, row.Infos.ETA})
 	}
 	return rows
 }
