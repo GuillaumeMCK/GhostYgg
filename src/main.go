@@ -79,7 +79,7 @@ func init() {
 }
 
 func main() {
-	err := tui.StartTea(torrentFiles, downloadFolder)
+	err := tui.StartTUI(torrentFiles, downloadFolder)
 	if err != nil {
 		log.Fatal(err)
 	}

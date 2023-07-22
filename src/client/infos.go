@@ -19,9 +19,9 @@ func defaultInfos(name string) Infos {
 	return Infos{
 		Name:          name,
 		Progress:      "",
-		Seeders:       "0",
-		Leechers:      "0",
-		DownloadSpeed: "0.00MB/s",
-		ETA:           "00:00:00",
+		Seeders:       "",
+		Leechers:      "",
+		DownloadSpeed: "",
+		ETA:           "",
 	}
 }

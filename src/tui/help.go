@@ -6,6 +6,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// Help represents the TUI help model.
 type Help struct {
 	keys      constants.KeyMap
 	help      help.Model
@@ -13,35 +14,35 @@ type Help struct {
 }
 
 // NewHelp creates a new help model.
-func NewHelp() Help {
+func NewHelp() *Help {
 	h := help.New()
 	h.Styles = constants.HelpStyle
 
-	return Help{
+	return &Help{
 		keys:      constants.Keys,
 		help:      h,
 		maxHeight: len(constants.Keys.FullHelp()[0]),
 	}
 }
 
-func (m Help) Init() tea.Cmd { return nil }
+func (h *Help) Init() tea.Cmd { return nil }
 
-func (m Help) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	return m, nil
+func (h *Help) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	return h, nil
 }
 
-func (m Help) View() string {
-	return constants.BaseHelpStyle.Render(m.help.View(m.keys))
+func (h *Help) View() string {
+	return constants.BaseHelpStyle.Render(h.help.View(h.keys))
 }
 
-func (m *Help) switchHelp() {
-	m.help.ShowAll = !m.help.ShowAll
-	constants.HelpHeight = m.GetHeight()
+func (h *Help) switchHelp() {
+	h.help.ShowAll = !h.help.ShowAll
+	constants.HelpHeight = h.getHeight()
 }
 
-func (m Help) GetHeight() int {
-	if !m.help.ShowAll {
+func (h *Help) getHeight() int {
+	if !h.help.ShowAll {
 		return 1 + 1
 	}
-	return m.maxHeight + 1
+	return h.maxHeight + 1
 }

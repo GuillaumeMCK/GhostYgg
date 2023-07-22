@@ -61,7 +61,7 @@ func (m Table) selectedRow() int {
 }
 
 // NewTable creates a new table based on the input context.
-func NewTable(ctx *TableCtx) Table {
+func NewTable(ctx *TableCtx) *Table {
 	rows, columns, height := generateTableContent(ctx)
 	t := table.New(
 		table.WithColumns(columns),
@@ -70,7 +70,7 @@ func NewTable(ctx *TableCtx) Table {
 		table.WithHeight(height),
 	)
 	t.SetStyles(constants.TableStyle)
-	return Table{table: t, ctx: ctx}
+	return &Table{table: t, ctx: ctx}
 }
 
 // generateTableContent generates the content of the table based on the input context.

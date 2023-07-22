@@ -94,10 +94,11 @@ func (m Model) trackDownload(t *torrent.Torrent, downloadInfo *DownloadInfos) {
 			downloadInfo.SetETA(constants.Cross)
 			t.Drop()
 		} else if downloadInfo.paused {
-			t.DisallowDataDownload()
+			println("paused")
+			t.Drop()
 			downloadInfo.SetETA(constants.Paused)
 		} else {
-			t.AllowDataDownload()
+			t.DownloadAll()
 		}
 
 		// write the download info to the queue
