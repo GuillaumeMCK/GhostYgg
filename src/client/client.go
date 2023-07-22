@@ -55,7 +55,6 @@ func (m *Model) AddTorrent(path string) error {
 		torrentInfos.Abort()
 	} else {
 		torrentInfos = defaultTorrentInfos(t.Info().Name, lenght, path)
-
 	}
 	// Add the torrent infos to the model
 	*m.Torrents = append(*m.Torrents, torrentInfos)

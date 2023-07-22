@@ -40,8 +40,14 @@ func (m TUI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, constants.Keys.Help):
 			m.help.switchHelp()
 			return m, updateTable()
-		//case key.Matches(msg, constants.Keys.Add):
-		//	// TODO: add a new download. use sqweek/dialog.go lib to pick a file
+		case key.Matches(msg, constants.Keys.Add):
+			go func() {
+				path, err := utils.PickTorrentFilePath("Select torrent file")
+				if path != "" && err == nil {
+					m.torrentClient.AddTorrent(path)
+				}
+			}()
+			return m, nil
 		case key.Matches(msg, constants.Keys.Open):
 			utils.OpenDirectory(constants.DownloadFolder)
 			return m, nil
