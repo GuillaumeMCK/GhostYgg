@@ -12,9 +12,9 @@ import (
 
 // Model represents the torrent client model.
 type Model struct {
-	DownloadsQueue *[]DownloadInfos
-	client         *torrent.Client
-	files          []string
+	Downloads *[]DownloadInfos
+	client    *torrent.Client
+	files     []string
 }
 
 // New creates a new torrent client model.
@@ -31,7 +31,7 @@ func New(downloadFolder string, files []string) Model {
 	downloadsInfos := make([]DownloadInfos, 0)
 
 	// Create a new model
-	return Model{DownloadsQueue: &downloadsInfos, client: client, files: files}
+	return Model{Downloads: &downloadsInfos, client: client, files: files}
 }
 
 // Start starts the download process for the client.
@@ -47,7 +47,7 @@ func (m Model) Start() error {
 			downloadInfo = defaultDownloadInfos(t.Info().Name, i)
 		}
 		// Add download info to the queue
-		*m.DownloadsQueue = append(*m.DownloadsQueue, downloadInfo)
+		*m.Downloads = append(*m.Downloads, downloadInfo)
 
 		// Start downloading the client
 		t.DownloadAll()
@@ -57,7 +57,7 @@ func (m Model) Start() error {
 			continue // Skip the rest
 		}
 		// Track download progress. Take downloadInfo as a pointer from the queue with the index i
-		go m.trackDownload(t, &(*m.DownloadsQueue)[i])
+		go m.trackDownload(t, &(*m.Downloads)[i])
 	}
 	return nil
 }
@@ -94,7 +94,6 @@ func (m Model) trackDownload(t *torrent.Torrent, downloadInfo *DownloadInfos) {
 			downloadInfo.SetETA(constants.Cross)
 			t.Drop()
 		} else if downloadInfo.paused {
-			println("paused")
 			t.Drop()
 			downloadInfo.SetETA(constants.Paused)
 		} else {
@@ -102,7 +101,7 @@ func (m Model) trackDownload(t *torrent.Torrent, downloadInfo *DownloadInfos) {
 		}
 
 		// write the download info to the queue
-		(*m.DownloadsQueue)[downloadInfo.Index()] = *downloadInfo
+		(*m.Downloads)[downloadInfo.Index()] = *downloadInfo
 
 		if downloadInfo.finished || downloadInfo.aborted {
 			break
@@ -126,7 +125,7 @@ func calculateETA(remainingBytes int64, downloadRate float64) time.Duration {
 
 // Abort aborts all downloads in the client model.
 func (m *Model) Abort() {
-	for _, downloadInfo := range *m.DownloadsQueue {
+	for _, downloadInfo := range *m.Downloads {
 		downloadInfo.Abort()
 	}
 }

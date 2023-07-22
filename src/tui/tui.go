@@ -33,7 +33,7 @@ func (m TUI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, tea.Batch(cmd, updateTable(), updateTuiLoop())
 	case UpdateTableMsg:
-		m.table.refresh(*m.torrentClient.DownloadsQueue)
+		m.table.refresh(*m.torrentClient.Downloads)
 		return m, nil
 	case tea.KeyMsg:
 		switch {
@@ -46,10 +46,10 @@ func (m TUI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			utils.OpenDirectory(constants.DownloadFolder)
 			return m, nil
 		case key.Matches(msg, constants.Keys.Delete):
-			(*m.torrentClient.DownloadsQueue)[m.table.selectedRow()].Abort()
+			(*m.torrentClient.Downloads)[m.table.selectedRow()].Abort()
 			return m, nil
 		case key.Matches(msg, constants.Keys.PauseAndPlay):
-			(*m.torrentClient.DownloadsQueue)[m.table.selectedRow()].PauseAndPlay()
+			(*m.torrentClient.Downloads)[m.table.selectedRow()].PauseAndPlay()
 			return m, nil
 		case key.Matches(msg, constants.Keys.Quit):
 			m.torrentClient.Abort()
