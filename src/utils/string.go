@@ -3,19 +3,12 @@ package utils
 import (
 	"bytes"
 	"fmt"
-	"golang.org/x/crypto/ssh/terminal"
 	"os"
+	"os/exec"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
-)
-
-const (
-	UP           = "\033[A"    // ANSI escape sequence to move the cursor up one line
-	DOWN         = "\033[B"    // ANSI escape sequence to move the cursor down one line
-	RESET        = "\033[0m"   // ANSI escape sequence to reset all attributes
-	CURSOR_START = "\033[1;1H" // ANSI escape sequence to move the cursor to the start of the line
-	CLEAR_SCREEN = "\033[2J"   // ANSI escape sequence to clear the screen
 )
 
 const (
@@ -62,27 +55,6 @@ func GetDateTime() string {
 	return time.Now().Format("02/01/2006 15:04:05")
 }
 
-// ClearScreen clears the terminal screen.
-func ClearScreen() {
-	fmt.Print(CLEAR_SCREEN)
-	fmt.Print(CURSOR_START)
-}
-
-// PrintRow prints a string on a specific row of the terminal, adjusting the row position and truncating the string if necessary.
-func PrintRow(rowIndex int, s string) {
-	down := strings.Repeat(DOWN, rowIndex)
-	up := strings.Repeat(UP, rowIndex)
-
-	consoleWidth, _, err := terminal.GetSize(int(os.Stdout.Fd())) // get the width of the console in characters
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	s = truncate(s, consoleWidth)
-
-	fmt.Printf("%s%s\r%s%s", RESET, down, s, up)
-}
-
 // truncate truncates the given string if its length exceeds the maximum limit, appending ellipsis.
 func truncate(s string, width int) string {
 	printableLen := len(s) - countEscapeCharsAndColors(s)
@@ -119,4 +91,32 @@ func countEscapeCharsAndColors(input string) int {
 	// find all matches in the string
 	matches := re.FindAllString(input, -1)
 	return len(matches) * 5 // each escape character ≈ 4 characters
+}
+
+// FormatDuration formats a duration in a human-readable format.
+func FormatDuration(duration time.Duration) string {
+	duration *= time.Second
+	hours := int(duration.Hours())
+	minutes := int(duration.Minutes()) % 60
+	seconds := int(duration.Seconds()) % 60
+
+	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)
+}
+
+// OpenDirectory opens the given directory in the default file manager. (macos, linux, windows)
+func OpenDirectory(dir string) error {
+	var cmd *exec.Cmd
+
+	switch runtime.GOOS {
+	case "darwin": // macOS
+		cmd = exec.Command("open", dir)
+	case "linux":
+		cmd = exec.Command("xdg-open", dir)
+	case "windows":
+		cmd = exec.Command("explorer", dir)
+	default:
+		return os.ErrNotExist // Unsupported operating system
+	}
+
+	return cmd.Run()
 }
