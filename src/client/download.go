@@ -25,11 +25,16 @@ func (d *DownloadInfos) SetETA(eta string) {
 
 func (d *DownloadInfos) PauseAndPlay() {
 	d.paused = !d.paused
+	if d.paused && !d.finished && !d.aborted {
+		d.SetETA(constants.Paused)
+	}
 }
 
 func (d *DownloadInfos) Abort() {
 	d.aborted = true
-	d.SetETA(constants.Cross)
+	if !d.finished {
+		d.SetETA(constants.Cross)
+	}
 }
 
 func (d *DownloadInfos) Index() int {

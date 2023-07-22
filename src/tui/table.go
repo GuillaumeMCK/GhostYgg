@@ -30,14 +30,12 @@ func (m Table) Init() tea.Cmd {
 func (m Table) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.refresh()
-	switch msg := msg.(type) {
+	switch msg.(type) {
 	case UpdateTableMsg:
 		m.refresh()
 		return m, cmd
-	case SelectedRowMsg:
-		return m, selectedRow(msg.Index)
 	}
-	m.table.Update(msg)
+	m.table, cmd = m.table.Update(msg)
 	return m, cmd
 }
 
@@ -46,12 +44,20 @@ func (m Table) View() string {
 	return constants.BaseTableStyle.Render(m.table.View())
 }
 
-// refresh refreshes the table.
-func (m *Table) refresh() {
+// refresh refreshes the table with new rows (if provided).
+func (m *Table) refresh(newRows ...[]client.DownloadInfos) {
+	if len(newRows) > 0 {
+		m.ctx.Rows = newRows[0]
+	}
 	rows, columns, height := generateTableContent(m.ctx)
 	m.table.SetColumns(columns)
 	m.table.SetRows(rows)
 	m.table.SetHeight(height)
+}
+
+// selectedRow returns the index of the selected row.
+func (m Table) selectedRow() int {
+	return m.table.Cursor()
 }
 
 // NewTable creates a new table based on the input context.

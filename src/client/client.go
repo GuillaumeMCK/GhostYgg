@@ -10,26 +10,31 @@ import (
 	"time"
 )
 
+// Model represents the torrent client model.
 type Model struct {
 	DownloadsQueue *[]DownloadInfos
 	client         *torrent.Client
 	files          []string
 }
 
+// New creates a new torrent client model.
 func New(downloadFolder string, files []string) Model {
 	// Create a new configuration for the torrent client
 	clientConfig := createClientConfig(downloadFolder)
+
 	// Create a new torrent client
 	client, err := torrent.NewClient(clientConfig)
-	downloadsInfos := make([]DownloadInfos, 0)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	downloadsInfos := make([]DownloadInfos, 0)
 
 	// Create a new model
 	return Model{DownloadsQueue: &downloadsInfos, client: client, files: files}
 }
 
+// Start starts the download process for the client.
 func (m Model) Start() error {
 	// Add the client files to the client
 	for i, file := range m.files {
@@ -51,17 +56,16 @@ func (m Model) Start() error {
 		if err != nil {
 			continue // Skip the rest
 		}
-		// Track download progress
-		go m.trackDownload(t, &downloadInfo)
+		// Track download progress. Take downloadInfo as a pointer from the queue with the index i
+		go m.trackDownload(t, &(*m.DownloadsQueue)[i])
 	}
 	return nil
 }
 
-// trackDownload tracks the download progress of a client
+// trackDownload tracks the download progress of a client.
 func (m Model) trackDownload(t *torrent.Torrent, downloadInfo *DownloadInfos) {
-	// Wait for the client to get info
 	<-t.GotInfo()
-	// Define variables
+
 	name := t.Info().Name
 	startTime := time.Now()
 	startSize := t.BytesCompleted()
@@ -95,17 +99,23 @@ func (m Model) trackDownload(t *torrent.Torrent, downloadInfo *DownloadInfos) {
 		} else {
 			t.AllowDataDownload()
 		}
+
+		// write the download info to the queue
+		(*m.DownloadsQueue)[downloadInfo.Index()] = *downloadInfo
+
 		if downloadInfo.finished || downloadInfo.aborted {
 			break
 		}
-		time.Sleep(350 * time.Millisecond)
+		time.Sleep(150 * time.Millisecond)
 	}
 }
 
+// calculateDownloadRate calculates the download rate in MB/s.
 func calculateDownloadRate(bytesCompleted, startSize int64, elapsedTime time.Duration) float64 {
 	return float64(bytesCompleted-startSize) / elapsedTime.Seconds() / 1024 / 1024
 }
 
+// calculateETA calculates the estimated time of arrival for the download completion.
 func calculateETA(remainingBytes int64, downloadRate float64) time.Duration {
 	if downloadRate > 0 {
 		return time.Duration(int64(float64(remainingBytes) / downloadRate / 1024 / 1024))
@@ -113,14 +123,14 @@ func calculateETA(remainingBytes int64, downloadRate float64) time.Duration {
 	return time.Duration(0)
 }
 
-// Abort all downloads
+// Abort aborts all downloads in the client model.
 func (m *Model) Abort() {
 	for _, downloadInfo := range *m.DownloadsQueue {
 		downloadInfo.Abort()
 	}
 }
 
-// createClientConfig creates a new configuration for the torrent client
+// createClientConfig creates a new configuration for the torrent client.
 func createClientConfig(downloadFolder string) *torrent.ClientConfig {
 	clientConfig := torrent.NewDefaultClientConfig()
 	clientConfig.DataDir = downloadFolder

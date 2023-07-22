@@ -8,17 +8,19 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// Model represents the TUI model.
 type Model struct {
 	table         Table
 	help          Help
-	selectedRow   int
 	torrentClient client.Model
 }
 
+// Init initializes the TUI model and returns a command to execute during the initialization.
 func (m Model) Init() tea.Cmd {
-	return updateTuiLoop()
+	return tea.Batch(tea.ClearScreen, tea.ClearScrollArea, updateTuiLoop())
 }
 
+// Update handles incoming messages and updates the TUI model accordingly.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
@@ -30,11 +32,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, tea.Batch(cmd, updateTable(), updateTuiLoop())
 	case UpdateTableMsg:
-		m.table.ctx.Rows = *m.torrentClient.DownloadsQueue
-		m.table.refresh()
-		return m, cmd
-	case SelectedRowMsg:
-		m.selectedRow = msg.Index
+		m.table.refresh(*m.torrentClient.DownloadsQueue)
 		return m, nil
 	case tea.KeyMsg:
 		switch {
@@ -47,25 +45,26 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			utils.OpenDirectory(constants.DownloadFolder)
 			return m, nil
 		case key.Matches(msg, constants.Keys.Delete):
-			(*m.torrentClient.DownloadsQueue)[m.selectedRow].Abort()
+			(*m.torrentClient.DownloadsQueue)[m.table.selectedRow()].Abort()
 			return m, nil
 		case key.Matches(msg, constants.Keys.PauseAndPlay):
-			(*m.torrentClient.DownloadsQueue)[m.selectedRow].PauseAndPlay()
-			return m.Update(msg)
+			(*m.torrentClient.DownloadsQueue)[m.table.selectedRow()].PauseAndPlay()
+			return m, nil
 		case key.Matches(msg, constants.Keys.Quit):
 			m.torrentClient.Abort()
 			return m, tea.Quit
 		}
 	}
-
-	m.table.Update(msg)
+	m.table.table, cmd = m.table.table.Update(msg)
 	return m, cmd
 }
 
+// View renders the TUI view as a string.
 func (m Model) View() string {
 	return m.table.View() + "\n" + m.help.View()
 }
 
+// New creates a new TUI model and returns it along with a command to execute during initialization.
 func New(torrentFiles []string) (tea.Model, tea.Cmd) {
 	torrentClient := client.New(constants.DownloadFolder, torrentFiles)
 	err := torrentClient.Start()
@@ -80,7 +79,6 @@ func New(torrentFiles []string) (tea.Model, tea.Cmd) {
 			Widths:  constants.TableWidths,
 		}),
 		help:          NewHelp(),
-		selectedRow:   0,
 		torrentClient: torrentClient,
 	}
 

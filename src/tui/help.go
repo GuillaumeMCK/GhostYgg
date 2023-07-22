@@ -41,7 +41,7 @@ func (m *Help) switchHelp() {
 
 func (m Help) GetHeight() int {
 	if !m.help.ShowAll {
-		return 1
+		return 1 + 1
 	}
-	return m.maxHeight
+	return m.maxHeight + 1
 }

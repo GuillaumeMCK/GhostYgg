@@ -25,11 +25,11 @@ var Keys = KeyMap{
 		key.WithHelp("[a]", "add torrent"),
 	),
 	Delete: key.NewBinding(
-		key.WithKeys("d"),
-		key.WithHelp("[d]", "delete torrent"),
+		key.WithKeys("backspace"),
+		key.WithHelp("[backspace]", "delete"),
 	),
 	PauseAndPlay: key.NewBinding(
-		key.WithKeys("space"),
+		key.WithKeys(" "),
 		key.WithHelp("[ ]", "pause/play"),
 	),
 	Quit: key.NewBinding(

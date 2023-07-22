@@ -20,13 +20,3 @@ func updateTable() tea.Cmd {
 		return UpdateTableMsg{}
 	}
 }
-
-type SelectedRowMsg struct {
-	Index int
-}
-
-func selectedRow(index int) tea.Cmd {
-	return func() tea.Msg {
-		return SelectedRowMsg{Index: index}
-	}
-}
