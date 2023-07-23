@@ -2,14 +2,11 @@ name: goreleaser
 
 on:
   push:
-    # run only against tags
     tags:
-      - '*'
+      - 'v*.*.*'
 
 permissions:
   contents: write
-  # packages: write
-  # issues: write
 
 jobs:
   goreleaser:
