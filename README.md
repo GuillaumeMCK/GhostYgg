@@ -1,9 +1,8 @@
 # GhostYgg
 
-[![Build Status](https://travis-ci.com/GuillaumeMCK/GhostYgg.svg?branch=main)](https://travis-ci.com/GuillaumeMCK/GhostYgg)
+[![Release](https://img.shields.io/github/release/GuillaumeMCK/GhostYgg.svg)](https://github.com/GuillaumeMCK/GhostYgg/releases)
 [![Go Report Card](https://goreportcard.com/badge/github.com/GuillaumeMCK/GhostYgg)](https://goreportcard.com/report/github.com/GuillaumeMCK/GhostYgg)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/github/release/GuillaumeMCK/GhostYgg.svg)](https://github.com/GuillaumeMCK/GhostYgg/releases)
 
 <div align="center">
 
@@ -100,7 +99,3 @@ To get started with GhostYgg, follow these steps:
 
 Contributions to GhostYgg are welcome! If you have bug fixes, improvements, or new features to add, please feel free to
 open a pull request 👍.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

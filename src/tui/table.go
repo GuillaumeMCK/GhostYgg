@@ -68,15 +68,15 @@ func NewTable(ctx *TableCtx) *Table {
 		table.WithRows(rows),
 		table.WithFocused(true),
 		table.WithHeight(height),
+		table.WithStyles(constants.TableStyle),
 	)
-	t.SetStyles(constants.TableStyle)
 	return &Table{table: t, ctx: ctx}
 }
 
 // generateTableContent generates the content of the table based on the input context.
 func generateTableContent(ctx *TableCtx) ([]table.Row, []table.Column, int) {
-	height := constants.WindowSize.Height - (4 + constants.HelpHeight)
-	width := constants.WindowSize.Width - 4
+	height := constants.WindowSize.Height - (3 + constants.HelpHeight)
+	width := constants.WindowSize.Width - 3
 
 	columns := createColumns(ctx.Columns, ctx.Widths, width)
 	rows := createRows(ctx.Rows)
@@ -102,7 +102,7 @@ func createColumns(columnNames [6]string, widths [6]float32, screenWidth int) []
 	for _, pct := range widths {
 		totalColumnWidth += int(math.Ceil(float64(screenWidth) * float64(pct)))
 	}
-	maxScreenSize := screenWidth - 2*(len(columnNames)+1) // 2 for the padding on each side
+	maxScreenSize := screenWidth - 2*(len(columnNames)+1)
 	for i, pct := range widths {
 		w := int(math.Ceil(float64(screenWidth) * float64(pct)))
 		if totalColumnWidth > maxScreenSize {
