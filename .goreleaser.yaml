@@ -1,3 +1,4 @@
 # .goreleaser.yaml
 builds:
   - main: ./src/
+  - no_main_check: true
