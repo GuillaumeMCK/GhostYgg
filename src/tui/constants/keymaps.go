@@ -30,7 +30,7 @@ var Keys = KeyMap{
 	),
 	PauseAndPlay: key.NewBinding(
 		key.WithKeys(" "),
-		key.WithHelp("[ ]", "pause/play"),
+		key.WithHelp("[space]", "pause/play"),
 	),
 	Quit: key.NewBinding(
 		key.WithKeys("ctrl+c", "q"),
