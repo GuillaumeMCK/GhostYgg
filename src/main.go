@@ -31,7 +31,7 @@ func init() {
 	// Define how to use the program
 	flag.Usage = func() {
 		fmt.Printf("GhostYgg - Download torrents\n\n")
-		fmt.Printf("Usage: %s file1.client file2.torrent ... [options]\n\n", os.Args[0])
+		fmt.Printf("Usage: %s file1.torrent file2.torrent ... [options]\n\n", os.Args[0])
 		fmt.Printf("Download torrents.\n\n")
 		fmt.Printf("Options:\n")
 		flag.PrintDefaults()
