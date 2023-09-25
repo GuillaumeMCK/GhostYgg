@@ -13,10 +13,28 @@ func updateTuiLoop() tea.Cmd {
 	})
 }
 
-type UpdateTableMsg struct{}
+type UpdateContainerMsg struct{}
 
-func updateTable() tea.Cmd {
+func updateContainer() tea.Cmd {
 	return func() tea.Msg {
-		return UpdateTableMsg{}
+		return UpdateContainerMsg{}
+	}
+}
+
+type clearErrorMsg struct{}
+
+func clearErrorAfter(t time.Duration) tea.Cmd {
+	return tea.Tick(t, func(_ time.Time) tea.Msg {
+		return clearErrorMsg{}
+	})
+}
+
+type AddTorrentMsg struct {
+	Path string
+}
+
+func addTorrent(path string) tea.Cmd {
+	return func() tea.Msg {
+		return AddTorrentMsg{Path: path}
 	}
 }

@@ -3,6 +3,7 @@ package tui
 import (
 	"GhostYgg/src/client"
 	"GhostYgg/src/tui/constants"
+	"GhostYgg/src/utils"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"math"
@@ -10,7 +11,7 @@ import (
 
 // Table represents the model of the table.
 type Table struct {
-	table table.Model
+	table *table.Model
 	ctx   *TableCtx
 }
 
@@ -19,6 +20,7 @@ type TableCtx struct {
 	Columns [6]string
 	Rows    []client.TorrentInfos
 	Widths  [6]float32
+	Size    *utils.Size
 }
 
 // Init initializes the table on creation.
@@ -31,16 +33,17 @@ func (m Table) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.refresh()
 	switch msg.(type) {
-	case UpdateTableMsg:
+	case UpdateContainerMsg:
 		m.refresh()
-		return m, cmd
+		return m, nil
 	}
-	m.table, cmd = m.table.Update(msg)
+	*m.table, cmd = m.table.Update(msg)
 	return m, cmd
 }
 
 // View returns the view for the model.
 func (m Table) View() string {
+
 	return constants.BaseTableStyle.Render(m.table.View())
 }
 
@@ -70,18 +73,18 @@ func NewTable(ctx *TableCtx) *Table {
 		table.WithHeight(height),
 		table.WithStyles(constants.TableStyle),
 	)
-	return &Table{table: t, ctx: ctx}
+	return &Table{table: &t, ctx: ctx}
 }
 
 // generateTableContent generates the content of the table based on the input context.
 func generateTableContent(ctx *TableCtx) ([]table.Row, []table.Column, int) {
-	height := constants.WindowSize.Height - (3 + constants.HelpHeight)
-	width := constants.WindowSize.Width - 3
+	height := ctx.Size.Height - 3
+	width := ctx.Size.Width - 3
 
 	columns := createColumns(ctx.Columns, ctx.Widths, width)
 	rows := createRows(ctx.Rows)
 	for _, column := range columns {
-		width -= column.Width + 1 // Add 1 for the column separator
+		width -= column.Width + 1
 	}
 	if width > 0 {
 		for i := range columns {

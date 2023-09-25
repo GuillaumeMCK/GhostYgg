@@ -7,13 +7,17 @@ import (
 	"fmt"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"strings"
 )
 
 // TUI represents the TUI model
 type TUI struct {
 	table         *Table
 	help          *Help
+	header        *Header
 	torrentClient *client.Model
+	filepicker    *FilePicker
+	container     *utils.Size
 }
 
 // Init initializes the TUI model and returns a command to execute during the initialization.
@@ -31,44 +35,71 @@ func (m TUI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			constants.WindowSize = winSize
 			cmd = tea.ClearScreen
 		}
-		return m, tea.Batch(cmd, updateTable(), updateTuiLoop())
-	case UpdateTableMsg:
-		m.table.refresh(*m.torrentClient.Torrents)
-		return m, nil
+		return m, tea.Batch(cmd, updateContainer(), updateTuiLoop())
+	case UpdateContainerMsg:
+		m.container.Resize(
+			constants.WindowSize.Width,
+			constants.WindowSize.Height-m.help.getHeight()-m.header.getHeight())
+		if m.filepicker.shown {
+			m.filepicker.Update(msg)
+		}
+		m.table.refresh(m.torrentClient.Torrents)
+		m.table.Update(msg)
+	case AddTorrentMsg:
+		err := m.torrentClient.AddTorrent(msg.Path)
+		if err != nil {
+			return nil, nil
+		}
+		m.table.refresh(m.torrentClient.Torrents)
+		m.table.Update(msg)
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, constants.Keys.Help):
-			m.help.switchHelp()
-			return m, updateTable()
+			m.help.Update(msg)
+			return m, updateContainer()
 		case key.Matches(msg, constants.Keys.Add):
-			go func() {
-				path, err := utils.PickTorrentFilePath("Select torrent file")
-				if path != "" && err == nil {
-					m.torrentClient.AddTorrent(path)
-				}
-			}()
-			return m, nil
+			m.filepicker.Update(msg)
+			return m, updateContainer()
 		case key.Matches(msg, constants.Keys.Open):
 			utils.OpenDirectory(constants.DownloadFolder)
 			return m, nil
 		case key.Matches(msg, constants.Keys.Delete):
-			(*m.torrentClient.Torrents)[m.table.selectedRow()].Abort()
-			return m, nil
+			if len(m.torrentClient.Torrents) == 0 {
+				return m, nil
+			}
+			m.torrentClient.Torrents[m.table.selectedRow()].Abort()
+			return m, updateContainer()
 		case key.Matches(msg, constants.Keys.PauseAndPlay):
-			(*m.torrentClient.Torrents)[m.table.selectedRow()].PauseAndPlay()
-			return m, nil
+			if len(m.torrentClient.Torrents) == 0 {
+				return m, nil
+			}
+			m.torrentClient.Torrents[m.table.selectedRow()].PauseAndPlay()
+			return m, updateContainer()
 		case key.Matches(msg, constants.Keys.Quit):
+			if m.filepicker.shown {
+				m.filepicker.Update(msg)
+				return m, nil
+			}
 			m.torrentClient.Abort()
 			return m, tea.Quit
 		}
 	}
-	m.table.table, cmd = m.table.table.Update(msg)
+	m.table.Update(msg)
+	m.filepicker.Update(msg)
 	return m, cmd
 }
 
 // View renders the TUI view as a string.
 func (m TUI) View() string {
-	return m.table.View() + "\n" + m.help.View()
+	var s strings.Builder
+	s.WriteString(m.header.View())
+	if m.filepicker.shown {
+		s.WriteString(m.filepicker.View())
+	} else {
+		s.WriteString(m.table.View())
+	}
+	s.WriteString("\n" + m.help.View())
+	return constants.BaseContainerStyle.Render(s.String())
 }
 
 // NewTUI creates a new TUI model.
@@ -80,14 +111,20 @@ func NewTUI(torrentFiles []string) (tea.Model, tea.Cmd) {
 		panic("error starting torrent client")
 	}
 
+	var containerSize = utils.NewSize(80, 24)
+
 	m := TUI{
 		table: NewTable(&TableCtx{
 			Rows:    make([]client.TorrentInfos, 0),
 			Columns: constants.TableColumns,
 			Widths:  constants.TableWidths,
+			Size:    &containerSize,
 		}),
-		help:          NewHelp(),
+		help:          NewHelp(&containerSize),
 		torrentClient: torrentClient,
+		filepicker:    NewFilePicker(&containerSize),
+		container:     &containerSize,
+		header:        NewHeader(),
 	}
 
 	return m, nil

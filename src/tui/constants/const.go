@@ -9,8 +9,6 @@ var (
 	P *tea.Program
 	// WindowSize store the size of the terminal window
 	WindowSize tea.WindowSizeMsg = tea.WindowSizeMsg{Width: 80, Height: 24}
-	// HelpHeight is the height of the help context menu
-	HelpHeight = 2
 	// DownloadFolder is the folder where the torrents will be downloaded
 	DownloadFolder string
 	// TableColumns are the columns of the table

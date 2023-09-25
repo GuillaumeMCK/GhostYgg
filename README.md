@@ -27,15 +27,15 @@
 
 </div>
 
-> Made with ☕ for fun. <br>
-> GhostYgg is a simple command-line tool for downloading torrents without seeding & increase download rate.
+> Made with ☕ for fun.
+> GhostYgg is a simple command-line tool for downloading torrents without seeding & increasing download rate.
 
 ## Usage
 
 To use GhostYgg, open a terminal or command prompt and execute the following command:
 
 ```bash
-$ GhostYgg file1.client file2.client ... [options]
+$ GhostYgg file1.torrent file2.torrent ... [options]
 ```
 
 > **Note**: Dragging and dropping torrent files onto the executable is supported only on Windows for now.
@@ -58,9 +58,9 @@ operating system.
 | <kbd>o</kbd>                   | Open Folder |
 | <kbd>a</kbd>                   | Add Torrent |
 | <kbd>space</kbd>               | Pause/Play  |
+| <kbd>backspace</kbd>           | Delete      |
 | <kbd>↑</kbd>                   | Move Up     |
 | <kbd>↓</kbd>                   | Move Down   |
-| <kbd>backspace</kbd>           | Delete      |
 | <kbd>?</kbd>                   | Help        |
 | <kbd>ctrl+c</kbd> <kbd>q</kbd> | Quit        |
 
@@ -92,7 +92,7 @@ To get started with GhostYgg, follow these steps:
 3. Run the executable:
 
    ```bash
-   $ ./GhostYgg file1.client file2.client ...
+   $ ./GhostYgg file1.torrent file2.torrent ...
    ```
 
 ## Contributing

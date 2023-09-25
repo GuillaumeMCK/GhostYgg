@@ -17,9 +17,13 @@ func Exist(filesPath []string) error {
 
 func GetDefaultDownloadFolder() (string, error) {
 	// Determine default download folder
-	homeDir, err := homedir.Dir()
+	homeDir, err := GetHomeDir()
 	if err != nil {
 		return "", err
 	}
 	return homedir.Expand(homeDir + "/Downloads")
+}
+
+func GetHomeDir() (string, error) {
+	return homedir.Dir()
 }

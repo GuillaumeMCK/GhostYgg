@@ -30,9 +30,8 @@ func init() {
 
 	// Define how to use the program
 	flag.Usage = func() {
-		fmt.Printf("GhostYgg - Download torrents\n\n")
+		fmt.Printf("GhostYgg - Torrent client\n\n")
 		fmt.Printf("Usage: %s file1.torrent file2.torrent ... [options]\n\n", os.Args[0])
-		fmt.Printf("Download torrents.\n\n")
 		fmt.Printf("Options:\n")
 		flag.PrintDefaults()
 	}
@@ -44,19 +43,6 @@ func init() {
 	if *helpFlag {
 		flag.Usage()
 		return
-	}
-
-	if len(torrentFiles) == 0 {
-		filePath, err := utils.PickTorrentFilePath("No torrent file specified. Do you want to choose a file?")
-		if err != nil {
-			torrentFiles = []string{}
-		} else {
-			torrentFiles = []string{filePath}
-		}
-	} else {
-		if err := utils.Exist(torrentFiles); err != nil {
-			log.Fatal(err)
-		}
 	}
 
 	// Determine default download folder

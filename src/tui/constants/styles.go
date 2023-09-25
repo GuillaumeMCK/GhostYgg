@@ -1,6 +1,7 @@
 package constants
 
 import (
+	"github.com/charmbracelet/bubbles/filepicker"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/lipgloss"
@@ -14,8 +15,9 @@ var (
 	BORDER     = lipgloss.AdaptiveColor{Light: "0", Dark: "240"}
 	TEXT       = lipgloss.AdaptiveColor{Light: "0", Dark: "255"}
 	DESC       = lipgloss.AdaptiveColor{Light: "244", Dark: "244"}
-	HIGHLIGHT  = lipgloss.AdaptiveColor{Light: "232", Dark: "232"}
+	HIGHLIGHT  = lipgloss.AdaptiveColor{Light: "252", Dark: "232"}
 	BACKGROUND = lipgloss.AdaptiveColor{Light: "", Dark: ""}
+	HEADER     = [3]string{"#87D700", "#11D700", "#00D795"}
 )
 
 var HelpStyle = help.Styles{
@@ -34,9 +36,10 @@ var BaseHelpStyle = lipgloss.NewStyle().
 var BaseTableStyle = lipgloss.NewStyle().
 	BorderBackground(BACKGROUND).
 	Background(BACKGROUND).
-	BorderStyle(lipgloss.RoundedBorder()).
 	BorderForeground(BORDER).
 	Foreground(TEXT)
+
+var BaseContainerStyle = BaseTableStyle.Copy().BorderStyle(lipgloss.RoundedBorder())
 
 var TableStyle = table.Styles{
 	Header: table.DefaultStyles().Header.
@@ -44,12 +47,51 @@ var TableStyle = table.Styles{
 		BorderForeground(BORDER).
 		BorderBackground(BACKGROUND).
 		Background(BACKGROUND).
-		BorderBottom(true).
+		//BorderBottom(true).
+		BorderTop(true).
 		Foreground(TEXT).
 		Bold(true),
 	Selected: table.DefaultStyles().Selected.
-		Foreground(HIGHLIGHT).
-		Background(GREEN).
+		Foreground(GREEN).
+		//Background(GREEN).
 		Bold(true),
 	Cell: table.DefaultStyles().Cell,
 }
+
+var FilePickerStyle = filepicker.Styles{
+	Selected: filepicker.DefaultStyles().Selected.
+		Foreground(GREEN).
+		Bold(true),
+	DisabledSelected: filepicker.DefaultStyles().DisabledSelected.
+		Foreground(RED).
+		Bold(true),
+	DisabledCursor: filepicker.DefaultStyles().DisabledCursor.
+		Foreground(RED).
+		Bold(true),
+	Cursor: filepicker.DefaultStyles().Cursor.
+		Foreground(GREEN).
+		Bold(true),
+	File: filepicker.DefaultStyles().File.
+		Foreground(TEXT).
+		Bold(true),
+	DisabledFile: filepicker.DefaultStyles().DisabledFile.
+		Foreground(DESC).
+		Bold(true),
+	Symlink: filepicker.DefaultStyles().Symlink.
+		Foreground(BLUE).
+		Bold(true),
+	Permission: filepicker.DefaultStyles().Permission.
+		Foreground(DESC).
+		Bold(false),
+	FileSize: filepicker.DefaultStyles().FileSize.
+		Foreground(DESC).
+		Bold(true),
+	EmptyDirectory: filepicker.DefaultStyles().EmptyDirectory.
+		Foreground(DESC).
+		Bold(false),
+}
+
+var HeadStyle = lipgloss.NewStyle().
+	Bold(true).
+	Foreground(HIGHLIGHT).
+	Background(TEXT)
