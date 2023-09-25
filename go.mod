@@ -17,9 +17,9 @@ require (
 	github.com/ajwerner/btree v0.0.0-20211221152037-f427b3e689c0 // indirect
 	github.com/alecthomas/atomic v0.1.0-alpha2 // indirect
 	github.com/anacrolix/chansync v0.3.0 // indirect
-	github.com/anacrolix/dht/v2 v2.19.2-0.20221121215055-066ad8494444 // indirect
+	github.com/anacrolix/dht/v2 v2.20.0 // indirect
 	github.com/anacrolix/envpprof v1.3.0 // indirect
-	github.com/anacrolix/generics v0.0.0-20230428105757-683593396d68 // indirect
+	github.com/anacrolix/generics v0.0.0-20230911070922-5dd7545c6b13 // indirect
 	github.com/anacrolix/go-libutp v1.3.1 // indirect
 	github.com/anacrolix/missinggo v1.3.0 // indirect
 	github.com/anacrolix/missinggo/perf v1.0.0 // indirect
@@ -84,9 +84,10 @@ require (
 	golang.org/x/crypto v0.13.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/net v0.15.0 // indirect
-	golang.org/x/sync v0.1.0 // indirect
+	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/term v0.12.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
-	golang.org/x/time v0.0.0-20220609170525-579cf78fd858 // indirect
+	golang.org/x/time v0.3.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
