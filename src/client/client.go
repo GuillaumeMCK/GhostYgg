@@ -69,8 +69,11 @@ func (m *Model) AddTorrent(path string) error {
 
 // Start starts the download process for the client.
 func (m *Model) Start() error {
-	for _, file := range m.files {
-		m.AddTorrent(file)
+	for _, path := range m.files {
+		err := m.AddTorrent(path)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
