@@ -78,7 +78,7 @@ func NewTable(ctx *TableCtx) *Table {
 
 // generateTableContent generates the content of the table based on the input context.
 func generateTableContent(ctx *TableCtx) ([]table.Row, []table.Column, int) {
-	height := ctx.Size.Height - 3
+	height := ctx.Size.Height - 4
 	width := ctx.Size.Width - 3
 
 	columns := createColumns(ctx.Columns, ctx.Widths, width)
