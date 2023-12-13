@@ -3,7 +3,7 @@ module GhostYgg
 go 1.20
 
 require (
-	github.com/anacrolix/torrent v1.53.1
+	github.com/anacrolix/torrent v1.53.2
 	github.com/charmbracelet/bubbles v0.16.1
 	github.com/charmbracelet/bubbletea v0.24.2
 	github.com/charmbracelet/lipgloss v0.9.1
