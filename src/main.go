@@ -25,7 +25,7 @@ func init() {
 			torrentFiles = append(torrentFiles, arg)
 		}
 	}
-	output = flag.String("output", "", "Download directory")
+	output = flag.String("o", "", "Download directory")
 	helpFlag = flag.Bool("help", false, "Show this message")
 
 	// Define how to use the program
