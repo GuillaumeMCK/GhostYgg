@@ -1,25 +1,23 @@
 package utils
 
 import (
-	"fmt"
 	"github.com/mitchellh/go-homedir"
 	"os"
 )
 
-func Exist(filesPath []string) error {
-	for _, file := range filesPath {
-		if _, err := os.Stat(file); os.IsNotExist(err) {
-			return fmt.Errorf("file %s does not exist", file)
-		}
-	}
-	return nil
+func Exist(filesPath string) bool {
+	_, err := os.Stat(filesPath)
+	return err == nil
 }
 
 func GetDefaultDownloadFolder() (string, error) {
-	// Determine default download folder
-	homeDir, err := homedir.Dir()
+	homeDir, err := GetHomeDir()
 	if err != nil {
 		return "", err
 	}
 	return homedir.Expand(homeDir + "/Downloads")
+}
+
+func GetHomeDir() (string, error) {
+	return homedir.Dir()
 }

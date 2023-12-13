@@ -31,17 +31,31 @@ func (d *TorrentInfos) SetETA(eta string) {
 
 func (d *TorrentInfos) PauseAndPlay() {
 	d.paused = !d.paused
-	if d.paused && !d.finished && !d.aborted {
+	if d.paused && !d.dropped {
+		d.Infos.reset()
 		d.SetETA(constants.Paused)
-	} else if !d.paused {
+	} else if !d.dropped {
 		d.SetETA(constants.Play)
 	}
 }
 
+func (d *TorrentInfos) Finished() {
+	d.finished = true
+	d.SetETA(constants.Validated)
+}
+
 func (d *TorrentInfos) Abort() {
 	d.aborted = true
-	if !d.finished {
+	if !d.dropped {
 		d.SetETA(constants.Cross)
+		d.Dropped()
+	}
+}
+
+func (d *TorrentInfos) Dropped() {
+	if !d.dropped {
+		d.dropped = true
+		d.Infos.reset()
 	}
 }
 

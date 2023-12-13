@@ -14,8 +14,9 @@ var (
 	BORDER     = lipgloss.AdaptiveColor{Light: "0", Dark: "240"}
 	TEXT       = lipgloss.AdaptiveColor{Light: "0", Dark: "255"}
 	DESC       = lipgloss.AdaptiveColor{Light: "244", Dark: "244"}
-	HIGHLIGHT  = lipgloss.AdaptiveColor{Light: "232", Dark: "232"}
+	HIGHLIGHT  = lipgloss.AdaptiveColor{Light: "252", Dark: "232"}
 	BACKGROUND = lipgloss.AdaptiveColor{Light: "", Dark: ""}
+	HEADER     = [3]string{"#87D700", "#11D700", "#00D795"}
 )
 
 var HelpStyle = help.Styles{
@@ -28,13 +29,12 @@ var HelpStyle = help.Styles{
 }
 
 var BaseHelpStyle = lipgloss.NewStyle().
-	BorderBackground(BACKGROUND).
 	Padding(0, 1)
 
 var BaseTableStyle = lipgloss.NewStyle().
+	BorderStyle(lipgloss.RoundedBorder()).
 	BorderBackground(BACKGROUND).
 	Background(BACKGROUND).
-	BorderStyle(lipgloss.RoundedBorder()).
 	BorderForeground(BORDER).
 	Foreground(TEXT)
 
@@ -45,11 +45,35 @@ var TableStyle = table.Styles{
 		BorderBackground(BACKGROUND).
 		Background(BACKGROUND).
 		BorderBottom(true).
+		BorderTop(false).
 		Foreground(TEXT).
 		Bold(true),
 	Selected: table.DefaultStyles().Selected.
-		Foreground(HIGHLIGHT).
-		Background(GREEN).
+		Foreground(GREEN).
+		//Background(GREEN).
 		Bold(true),
 	Cell: table.DefaultStyles().Cell,
 }
+
+var FirstCharFilePicker = lipgloss.NewStyle().
+	Padding(0, 1).
+	Foreground(GREEN).
+	Render("$")
+
+var ErrorStyle = lipgloss.NewStyle().
+	Foreground(RED)
+
+var PromptStyle = lipgloss.NewStyle().
+	Foreground(TEXT).
+	Bold(true)
+
+var TextStyle = lipgloss.NewStyle().
+	Foreground(TEXT)
+
+var PlaceholderStyle = lipgloss.NewStyle().
+	Foreground(DESC)
+
+var HeadStyle = lipgloss.NewStyle().
+	Bold(true).
+	Foreground(HIGHLIGHT).
+	Background(TEXT)

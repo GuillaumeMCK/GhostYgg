@@ -3,27 +3,25 @@ module GhostYgg
 go 1.20
 
 require (
-	github.com/anacrolix/torrent v1.52.3
+	github.com/anacrolix/log v0.14.2
+	github.com/anacrolix/torrent v1.52.4
 	github.com/charmbracelet/bubbles v0.16.1
 	github.com/charmbracelet/bubbletea v0.24.2
 	github.com/charmbracelet/lipgloss v0.7.1
 	github.com/evertras/bubble-table v0.15.2
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/sqweek/dialog v0.0.0-20220809060634-e981b270ebbf
 )
 
 require (
 	crawshaw.io/sqlite v0.3.3-0.20220618202545-d1964889ea3c // indirect
 	github.com/RoaringBitmap/roaring v1.2.3 // indirect
-	github.com/TheTitanrain/w32 v0.0.0-20180517000239-4f5cfb03fabf // indirect
 	github.com/ajwerner/btree v0.0.0-20211221152037-f427b3e689c0 // indirect
 	github.com/alecthomas/atomic v0.1.0-alpha2 // indirect
 	github.com/anacrolix/chansync v0.3.0 // indirect
 	github.com/anacrolix/dht/v2 v2.19.2-0.20221121215055-066ad8494444 // indirect
 	github.com/anacrolix/envpprof v1.2.1 // indirect
 	github.com/anacrolix/generics v0.0.0-20230428105757-683593396d68 // indirect
-	github.com/anacrolix/go-libutp v1.2.0 // indirect
-	github.com/anacrolix/log v0.14.0 // indirect
+	github.com/anacrolix/go-libutp v1.3.1 // indirect
 	github.com/anacrolix/missinggo v1.3.0 // indirect
 	github.com/anacrolix/missinggo/perf v1.0.0 // indirect
 	github.com/anacrolix/missinggo/v2 v2.7.2-0.20230527121029-a582b4f397b9 // indirect
