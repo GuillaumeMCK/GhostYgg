@@ -1,7 +1,6 @@
 package constants
 
 import (
-	"github.com/charmbracelet/bubbles/filepicker"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/lipgloss"
@@ -30,16 +29,14 @@ var HelpStyle = help.Styles{
 }
 
 var BaseHelpStyle = lipgloss.NewStyle().
-	BorderBackground(BACKGROUND).
 	Padding(0, 1)
 
 var BaseTableStyle = lipgloss.NewStyle().
+	BorderStyle(lipgloss.RoundedBorder()).
 	BorderBackground(BACKGROUND).
 	Background(BACKGROUND).
 	BorderForeground(BORDER).
 	Foreground(TEXT)
-
-var BaseContainerStyle = BaseTableStyle.Copy().BorderStyle(lipgloss.RoundedBorder())
 
 var TableStyle = table.Styles{
 	Header: table.DefaultStyles().Header.
@@ -47,8 +44,8 @@ var TableStyle = table.Styles{
 		BorderForeground(BORDER).
 		BorderBackground(BACKGROUND).
 		Background(BACKGROUND).
-		//BorderBottom(true).
-		BorderTop(true).
+		BorderBottom(true).
+		BorderTop(false).
 		Foreground(TEXT).
 		Bold(true),
 	Selected: table.DefaultStyles().Selected.
@@ -58,38 +55,23 @@ var TableStyle = table.Styles{
 	Cell: table.DefaultStyles().Cell,
 }
 
-var FilePickerStyle = filepicker.Styles{
-	Selected: filepicker.DefaultStyles().Selected.
-		Foreground(GREEN).
-		Bold(true),
-	DisabledSelected: filepicker.DefaultStyles().DisabledSelected.
-		Foreground(RED).
-		Bold(true),
-	DisabledCursor: filepicker.DefaultStyles().DisabledCursor.
-		Foreground(RED).
-		Bold(true),
-	Cursor: filepicker.DefaultStyles().Cursor.
-		Foreground(GREEN).
-		Bold(true),
-	File: filepicker.DefaultStyles().File.
-		Foreground(TEXT).
-		Bold(true),
-	DisabledFile: filepicker.DefaultStyles().DisabledFile.
-		Foreground(DESC).
-		Bold(true),
-	Symlink: filepicker.DefaultStyles().Symlink.
-		Foreground(BLUE).
-		Bold(true),
-	Permission: filepicker.DefaultStyles().Permission.
-		Foreground(DESC).
-		Bold(false),
-	FileSize: filepicker.DefaultStyles().FileSize.
-		Foreground(DESC).
-		Bold(true),
-	EmptyDirectory: filepicker.DefaultStyles().EmptyDirectory.
-		Foreground(DESC).
-		Bold(false),
-}
+var FirstCharFilePicker = lipgloss.NewStyle().
+	Padding(0, 1).
+	Foreground(GREEN).
+	Render("$")
+
+var ErrorStyle = lipgloss.NewStyle().
+	Foreground(RED)
+
+var PromptStyle = lipgloss.NewStyle().
+	Foreground(TEXT).
+	Bold(true)
+
+var TextStyle = lipgloss.NewStyle().
+	Foreground(TEXT)
+
+var PlaceholderStyle = lipgloss.NewStyle().
+	Foreground(DESC)
 
 var HeadStyle = lipgloss.NewStyle().
 	Bold(true).
