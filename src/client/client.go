@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/anacrolix/log"
 	"github.com/anacrolix/torrent"
+	"net"
 	"strconv"
 	"sync"
 	"time"
@@ -149,9 +150,36 @@ func (m *Model) Abort() {
 	}
 }
 
+// getAvailablePort returns an available port by listening on a random port and extracting the chosen port.
+func getAvailablePort() (int, error) {
+	listener, err := net.Listen("tcp", "localhost:0")
+	if err != nil {
+		return 0, err
+	}
+	defer listener.Close()
+
+	_, portString, err := net.SplitHostPort(listener.Addr().String())
+	if err != nil {
+		return 0, err
+	}
+
+	port, err := strconv.Atoi(portString)
+	if err != nil {
+		return 0, err
+	}
+
+	return port, nil
+}
+
 // createClientConfig creates a new configuration for the torrent client.
 func createClientConfig(downloadFolder string) *torrent.ClientConfig {
+	port, err := getAvailablePort()
+	if err != nil {
+		return nil
+	}
+
 	clientConfig := torrent.NewDefaultClientConfig()
+	clientConfig.ListenPort = port
 	clientConfig.DataDir = downloadFolder
 	clientConfig.DisableTrackers = false
 	clientConfig.Seed = false
