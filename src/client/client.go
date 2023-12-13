@@ -4,8 +4,11 @@ import (
 	"GhostYgg/src/tui/constants"
 	"GhostYgg/src/utils"
 	"fmt"
+	"github.com/anacrolix/log"
 	"github.com/anacrolix/torrent"
+	"net"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -17,58 +20,66 @@ const (
 
 // Model represents the torrent client model.
 type Model struct {
-	Torrents *[]TorrentInfos
-	client   *torrent.Client
-	files    []string
+	Torrents []TorrentInfos  // Slice to store information about each torrent being downloaded.
+	client   *torrent.Client // The underlying torrent client used to manage torrents.
+	files    []string        // Paths to the torrent files to be downloaded.
+	mux      sync.Mutex      // Mutex to protect concurrent access to Torrents slice.
 }
 
 // New creates a new torrent client model.
 func New(downloadFolder string, files []string) (*Model, error) {
-	// Create a new configuration for the torrent client
+	// Create a new configuration for the torrent client.
 	clientConfig := createClientConfig(downloadFolder)
-	// Create a new torrent client
+	// Create a new torrent client.
 	client, err := torrent.NewClient(clientConfig)
 	if err != nil {
 		return nil, err
 	}
 	TorrentsInfos := make([]TorrentInfos, 0)
-	// Create a new model
-	return &Model{Torrents: &TorrentsInfos, client: client, files: files}, nil
+	// Create a new model.
+	return &Model{Torrents: TorrentsInfos, client: client, files: files}, nil
+}
+
+// AddTorrent adds a new torrent info to the model.
+func (m *Model) AddTorrent(path string) error {
+	var torrentInfos TorrentInfos
+
+	m.mux.Lock()         // Lock the mutex before modifying the Torrents slice.
+	defer m.mux.Unlock() // Ensure we unlock the mutex even if there's a panic.
+
+	length := len(m.Torrents)
+
+	t, err := m.client.AddTorrentFromFile(path)
+	if err != nil {
+		torrentInfos = defaultTorrentInfos(err.Error(), length, path)
+		torrentInfos.Abort()
+	} else {
+		torrentInfos = defaultTorrentInfos(t.Info().Name, length, path)
+	}
+	// Add the torrent info to the model.
+	m.Torrents = append(m.Torrents, torrentInfos)
+
+	// Start downloading the torrent.
+	t.DownloadAll()
+
+	// Start tracking the torrent in a separate goroutine.
+	go m.trackTorrent(t, length)
+
+	return nil
 }
 
 // Start starts the download process for the client.
 func (m *Model) Start() error {
-	for _, file := range m.files {
-		m.AddTorrent(file)
+	for _, path := range m.files {
+		err := m.AddTorrent(path)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-// AddTorrent adds a new torrent infos to the model.
-func (m *Model) AddTorrent(path string) error {
-	var torrentInfos TorrentInfos
-	var lenght int = len(*m.Torrents)
-
-	t, err := m.client.AddTorrentFromFile(path)
-	if err != nil {
-		torrentInfos = defaultTorrentInfos(err.Error(), lenght, path)
-		torrentInfos.Abort()
-	} else {
-		torrentInfos = defaultTorrentInfos(t.Info().Name, lenght, path)
-	}
-	// Add the torrent infos to the model
-	*m.Torrents = append(*m.Torrents, torrentInfos)
-
-	// Start downloading the client
-	t.DownloadAll()
-
-	// Start tracking the torrent
-	go m.trackTorrent(t, lenght)
-
-	return nil
-}
-
-// trackTorrent tracks the download progress of a client.
+// trackTorrent tracks the download progress of a torrent.
 func (m *Model) trackTorrent(t *torrent.Torrent, index int) {
 	<-t.GotInfo()
 
@@ -77,7 +88,8 @@ func (m *Model) trackTorrent(t *torrent.Torrent, index int) {
 	startSize := t.BytesCompleted()
 
 	for {
-		torrentInfos := (*m.Torrents)[index]
+		m.mux.Lock() // Lock the mutex before accessing the Torrents slice.
+		torrentInfos := &m.Torrents[index]
 		bytesCompleted := t.BytesCompleted()
 		totalLength := t.Info().TotalLength()
 		elapsedTime := time.Since(startTime)
@@ -96,12 +108,7 @@ func (m *Model) trackTorrent(t *torrent.Torrent, index int) {
 			startSize = t.BytesCompleted()
 			startTime = time.Now()
 			torrentInfos.dropped = false
-		}
-
-		if bytesCompleted < totalLength &&
-			!torrentInfos.finished &&
-			!torrentInfos.aborted &&
-			!torrentInfos.paused {
+		} else if bytesCompleted < totalLength {
 			remainingBytes := totalLength - bytesCompleted
 			downloadRate := calculateDownloadRate(bytesCompleted, startSize, elapsedTime)
 			torrentInfos.Infos = Infos{
@@ -114,8 +121,7 @@ func (m *Model) trackTorrent(t *torrent.Torrent, index int) {
 			}
 		}
 
-		// Write the torrent infos to the model
-		(*m.Torrents)[index] = torrentInfos
+		m.mux.Unlock() // Unlock the mutex after accessing the Torrents slice.
 
 		if torrentInfos.finished || torrentInfos.aborted {
 			break
@@ -139,14 +145,41 @@ func calculateETA(remainingBytes int64, downloadRate float64) time.Duration {
 
 // Abort aborts all Torrents in the client model.
 func (m *Model) Abort() {
-	for _, torrentInfos := range *m.Torrents {
+	for _, torrentInfos := range m.Torrents {
 		torrentInfos.Abort()
 	}
 }
 
+// getAvailablePort returns an available port by listening on a random port and extracting the chosen port.
+func getAvailablePort() (int, error) {
+	listener, err := net.Listen("tcp", "localhost:0")
+	if err != nil {
+		return 0, err
+	}
+	defer listener.Close()
+
+	_, portString, err := net.SplitHostPort(listener.Addr().String())
+	if err != nil {
+		return 0, err
+	}
+
+	port, err := strconv.Atoi(portString)
+	if err != nil {
+		return 0, err
+	}
+
+	return port, nil
+}
+
 // createClientConfig creates a new configuration for the torrent client.
 func createClientConfig(downloadFolder string) *torrent.ClientConfig {
+	port, err := getAvailablePort()
+	if err != nil {
+		return nil
+	}
+
 	clientConfig := torrent.NewDefaultClientConfig()
+	clientConfig.ListenPort = port
 	clientConfig.DataDir = downloadFolder
 	clientConfig.DisableTrackers = false
 	clientConfig.Seed = false
@@ -157,5 +190,6 @@ func createClientConfig(downloadFolder string) *torrent.ClientConfig {
 	clientConfig.DisableWebseeds = true
 	clientConfig.DisableAcceptRateLimiting = true
 	clientConfig.NoDefaultPortForwarding = true
+	clientConfig.Logger.SetHandlers(log.DiscardHandler)
 	return clientConfig
 }

@@ -6,11 +6,12 @@ import "github.com/charmbracelet/bubbles/key"
 type KeyMap struct {
 	Open         key.Binding
 	Add          key.Binding
+	Enter        key.Binding
 	Delete       key.Binding
 	Up           key.Binding
 	Down         key.Binding
 	PauseAndPlay key.Binding
-	Quit         key.Binding
+	Exit         key.Binding
 	Help         key.Binding
 }
 
@@ -24,17 +25,21 @@ var Keys = KeyMap{
 		key.WithKeys("a"),
 		key.WithHelp("[a]", "add torrent"),
 	),
+	Enter: key.NewBinding(
+		key.WithKeys("enter"),
+		key.WithHelp("[enter]", "enter"),
+	),
 	Delete: key.NewBinding(
 		key.WithKeys("backspace"),
 		key.WithHelp("[backspace]", "delete"),
 	),
 	PauseAndPlay: key.NewBinding(
 		key.WithKeys(" "),
-		key.WithHelp("[ ]", "pause/play"),
+		key.WithHelp("[space]", "pause/play"),
 	),
-	Quit: key.NewBinding(
-		key.WithKeys("ctrl+c", "q"),
-		key.WithHelp("[ctrl+c] [q]", "quit"),
+	Exit: key.NewBinding(
+		key.WithKeys("ctrl+c", "esc"),
+		key.WithHelp("[ctrl+c, esc]", "exit"),
 	),
 	Up: key.NewBinding(
 		key.WithKeys("up"),
@@ -51,12 +56,15 @@ var Keys = KeyMap{
 }
 
 func (k KeyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Help, k.Quit, k.Add, k.Delete, k.PauseAndPlay}
+	return []key.Binding{k.Help, k.Exit, k.Add, k.Delete, k.PauseAndPlay, k.Open, k.Up, k.Down, k.Enter}
 }
 
 func (k KeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.Open, k.Add, k.Delete, k.PauseAndPlay}, // first column
-		{k.Up, k.Down, k.Help, k.Quit},            // second column
+		{k.Open, k.Add},
+		{k.Delete, k.PauseAndPlay},
+		{k.Up, k.Down},
+		{k.Enter, k.Exit},
+		{k.Help},
 	}
 }
