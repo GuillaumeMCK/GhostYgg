@@ -15,4 +15,7 @@ var (
 	TableColumns = [6]string{"Name", "Progress", "Seeders " + UpArrow, "Leeches " + DownArrow, "Download Speed", "ETA"}
 	// TableWidths are the widths of the table columns
 	TableWidths = [6]float32{0.4, 0.15, 0.1, 0.1, 0.15, 0.1}
+	// Exceptions
+	ErrNotTorrentFile = "Invalid file type. Please select a .torrent file."
+	ErrFileNotFound   = "File not found."
 )
