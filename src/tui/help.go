@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 // Help represents the TUI help model.
@@ -33,8 +34,13 @@ func (h *Help) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (h *Help) View() string {
-	h.help.Width = h.size.Width - 4 // -2 for the border
-	return constants.BaseHelpStyle.Render(h.help.View(h.keys))
+	h.help.Width = h.size.Width - 4
+	return lipgloss.NewStyle().
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(constants.BORDER).
+		Width(h.size.Width-2).
+		Align(lipgloss.Center).
+		Render(constants.BaseHelpStyle.Render(h.help.View(h.keys))) + "\n"
 }
 
 func (h *Help) Swicth() {
