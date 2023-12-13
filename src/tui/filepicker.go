@@ -1,97 +1,105 @@
 package tui
 
 import (
-	"errors"
-	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/lipgloss"
-	"time"
-
 	"GhostYgg/src/tui/constants"
 	"GhostYgg/src/utils"
-
-	"github.com/charmbracelet/bubbles/filepicker"
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"strings"
 )
 
-// FilePicker represents the TUI file picker model.
 type FilePicker struct {
-	filepicker   filepicker.Model
-	selectedFile string
-	shown        bool
-	size         *utils.Size
-	err          error
+	input textinput.Model
+	size  *utils.Size
+	err   string
 }
 
-func (m FilePicker) Init() tea.Cmd {
-	return m.filepicker.Init()
+func (m *FilePicker) Init() tea.Cmd {
+	m.input.Width = m.size.Width
+	return nil
 }
 
 func (m *FilePicker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, constants.Keys.Add):
-			if m.selectedFile != "" {
-				m.shown = false
-				return m, tea.Batch(cmd, addTorrent(m.selectedFile))
-			}
-			m.shown = true
-			return m, nil
-		case key.Matches(msg, constants.Keys.Quit):
-			m.shown = false
-			return m, nil
-		}
-	case clearErrorMsg:
-		m.err = nil
+
+	switch msg.(type) {
+	case UpdateContainerMsg:
+		m.updateWidth()
+		return m, nil
+	case ClearErrorMsg:
+		m.Clear()
+		return m, nil
+	}
+	m.input, cmd = m.input.Update(msg)
+
+	if m.input.Focused() {
+		return m, cmd
 	}
 
-	// Did the user select a file?
-	if didSelect, path := m.filepicker.DidSelectFile(msg); didSelect {
-		m.selectedFile = path
-	}
-
-	// Did the user select a disabled file?
-	// This is only necessary to display an error to the user.
-	if didSelect, path := m.filepicker.DidSelectDisabledFile(msg); didSelect {
-		// Let's clear the selectedFile and display an error.
-		m.err = errors.New(path + " is not valid.")
-		m.selectedFile = ""
-		return m, tea.Batch(cmd, clearErrorAfter(2*time.Second))
-	}
-
-	m.filepicker, cmd = m.filepicker.Update(msg)
 	return m, cmd
 }
 
-func (m FilePicker) View() string {
-	if !m.shown {
+func (m *FilePicker) View() string {
+	m.updateWidth()
+	var s strings.Builder
+	s.WriteString(constants.FirstCharFilePicker)
+	if !m.input.Focused() {
 		return ""
+	} else if m.err != "" {
+		s.WriteString(constants.ErrorStyle.Render(m.err))
+	} else if m.input.Value() == "" {
+		s.WriteString("Drag and drop a torrent file here or type the path to a torrent file and press Enter")
+	} else {
+		s.WriteString("Path: ")
+		s.WriteString(m.input.View())
 	}
-	m.updateHeight()
-	// print with padding top to 1
-	return lipgloss.NewStyle().
-		PaddingTop(1).
-		Render(m.filepicker.View())
+	s.WriteString("\n")
+	return s.String()
 }
 
-func (m FilePicker) updateHeight() {
-	m.filepicker.Height = m.size.Height
+func (m *FilePicker) Focus() tea.Cmd {
+	return m.input.Focus()
+}
+
+func (m *FilePicker) SetError(err string) {
+	m.err = err
+	clearErrorAfter(2)
+}
+
+func (m *FilePicker) GetValue() string {
+	return m.input.Value()
+}
+
+func (m *FilePicker) SetValue(value string) {
+	m.input.SetValue(value)
+}
+
+func (m *FilePicker) Clear() {
+	m.input.SetValue("")
+	m.err = ""
+}
+
+func (m *FilePicker) updateWidth() {
+	m.input.Width = m.size.Width
+}
+
+func (m *FilePicker) getHeight() int {
+	if !m.input.Focused() {
+		return 1
+	}
+	return 2
 }
 
 func NewFilePicker(size *utils.Size) *FilePicker {
-	fp := filepicker.New()
-	fp.Styles = constants.FilePickerStyle
-	fp.AllowedTypes = []string{".torrent"}
-	fp.CurrentDirectory, _ = utils.GetHomeDir()
-	fp.Height = size.Height - 2
-	fp.ShowHidden = false
-	fp.AutoHeight = false
-	fp.Cursor = " "
+	input := textinput.New()
+	input.PromptStyle = constants.PromptStyle
+	input.TextStyle = constants.TextStyle
+	input.PlaceholderStyle = constants.PlaceholderStyle
+	input.CharLimit = 4096
+	input.Width = size.Width
 
 	return &FilePicker{
-		filepicker: fp,
-		shown:      false,
-		size:       size,
+		input: input,
+		size:  size,
 	}
 }

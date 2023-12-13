@@ -21,11 +21,11 @@ func updateContainer() tea.Cmd {
 	}
 }
 
-type clearErrorMsg struct{}
+type ClearErrorMsg struct{}
 
 func clearErrorAfter(t time.Duration) tea.Cmd {
 	return tea.Tick(t, func(_ time.Time) tea.Msg {
-		return clearErrorMsg{}
+		return ClearErrorMsg{}
 	})
 }
 
