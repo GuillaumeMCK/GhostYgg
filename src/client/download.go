@@ -62,3 +62,7 @@ func (d *TorrentInfos) Dropped() {
 func (d *TorrentInfos) Idx() int {
 	return d.index
 }
+
+func (d *TorrentInfos) IsRunning() bool {
+	return !d.aborted && !d.dropped && !d.finished
+}

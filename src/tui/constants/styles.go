@@ -29,7 +29,7 @@ var HelpStyle = help.Styles{
 }
 
 var BaseHelpStyle = lipgloss.NewStyle().
-	Padding(0, 1)
+	Foreground(TEXT)
 
 var BaseTableStyle = lipgloss.NewStyle().
 	BorderStyle(lipgloss.RoundedBorder()).

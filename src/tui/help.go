@@ -49,9 +49,9 @@ func (h *Help) Swicth() {
 
 func (h *Help) getHeight() int {
 	if !h.help.ShowAll {
-		return 1 + 1
+		return 3
 	}
-	return h.maxHeight + 1
+	return h.maxHeight + 2
 }
 
 // NewHelp creates a new help model.

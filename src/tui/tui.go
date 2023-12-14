@@ -41,18 +41,21 @@ func (m TUI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case UpdateContainerMsg:
 		m.container.Resize(
 			constants.WindowSize.Width,
-			constants.WindowSize.Height-m.help.getHeight()-m.header.getHeight()-m.filePicker.getHeight())
+			constants.WindowSize.Height-m.header.getHeight()-m.help.getHeight()-m.filePicker.getHeight())
 		m.table.refresh(m.torrentClient.Torrents)
 		m.table.Update(msg)
+		return m, nil
 	case AddTorrentMsg:
 		err := m.torrentClient.AddTorrent(msg.Path)
 		if err != nil {
 			m.filePicker.SetError(err.Error())
-			return m, clearErrorAfter(2)
+			return m, tea.Batch(updateContainer())
 		}
 		m.table.refresh(m.torrentClient.Torrents)
+		m.filePicker.Clear()
+		m.filePicker.input.Blur()
+		return m, tea.Batch(updateContainer())
 	}
-
 	if m.filePicker.input.Focused() {
 		return m.handleFilePickerInput(msg)
 	} else {
@@ -60,6 +63,7 @@ func (m TUI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
+// handleFilePickerInput handles the messages when the file picker is focused.
 func (m *TUI) handleFilePickerInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -76,11 +80,11 @@ func (m *TUI) handleFilePickerInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.filePicker.SetError(constants.ErrFileNotFound)
 					return m, nil
 				}
-				m.filePicker.input.Blur()
-				return m, addTorrent(filePath)
+				return m, tea.Batch(addTorrent(filePath), updateContainer())
 			}
 		case key.Matches(msg, constants.Keys.Exit):
 			m.filePicker.input.Blur()
+			m.filePicker.Clear()
 			return m, updateContainer()
 		}
 	}
@@ -88,6 +92,7 @@ func (m *TUI) handleFilePickerInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+// handleKeyInput handles the messages when the file picker is not focused.
 func (m *TUI) handleKeyInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -110,12 +115,16 @@ func (m *TUI) handleKeyInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 			m.torrentClient.Torrents[m.table.selectedRow()].Abort()
+			m.table.refresh(m.torrentClient.Torrents)
 			return m, updateContainer()
 		case key.Matches(msg, constants.Keys.PauseAndPlay):
 			if len(m.torrentClient.Torrents) == 0 {
 				return m, nil
 			}
-			m.torrentClient.Torrents[m.table.selectedRow()].PauseAndPlay()
+			torrent := m.torrentClient.Torrents[m.table.selectedRow()]
+			if torrent.IsRunning() {
+				torrent.PauseAndPlay()
+			}
 			return m, updateContainer()
 		case key.Matches(msg, constants.Keys.Exit):
 			if m.filePicker.input.Focused() {
