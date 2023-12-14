@@ -44,6 +44,11 @@ func New(downloadFolder string, files []string) (*Model, error) {
 func (m *Model) AddTorrent(path string) error {
 	var torrentInfos TorrentInfos
 
+	// Check if the torrent is already added
+	if m.isTorrentAdded(path) {
+		return fmt.Errorf("Torrent already added: %s", path)
+	}
+
 	m.mux.Lock()         // Lock the mutex before modifying the Torrents slice.
 	defer m.mux.Unlock() // Ensure we unlock the mutex even if there's a panic.
 
@@ -66,6 +71,16 @@ func (m *Model) AddTorrent(path string) error {
 	go m.trackTorrent(t, length)
 
 	return nil
+}
+
+// isTorrentAdded checks if a torrent with the given path is already added.
+func (m *Model) isTorrentAdded(path string) bool {
+	for _, torrentInfos := range m.Torrents {
+		if torrentInfos.path == path {
+			return true
+		}
+	}
+	return false
 }
 
 // Start starts the download process for the client.

@@ -21,14 +21,6 @@ func updateContainer() tea.Cmd {
 	}
 }
 
-type ClearErrorMsg struct{}
-
-func clearErrorAfter(t time.Duration) tea.Cmd {
-	return tea.Tick(t, func(_ time.Time) tea.Msg {
-		return ClearErrorMsg{}
-	})
-}
-
 type AddTorrentMsg struct {
 	Path string
 }

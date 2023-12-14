@@ -48,7 +48,6 @@ func (m *FilePicker) Focus() tea.Cmd {
 
 func (m *FilePicker) SetError(err string) {
 	m.err = err
-	clearErrorAfter(2)
 }
 
 func (m *FilePicker) GetValue() string {
