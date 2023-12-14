@@ -5,24 +5,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 <div align="center">
-
-```
-GhostYgg 👻                                                                        
-╭───────────────────────────────────────────────────────────────────────────────────╮
-│      [?] help • [ctrl+c, esc] exit • [a] add torrent • [backspace] delete…        │
-╰───────────────────────────────────────────────────────────────────────────────────╯
-╭───────────────────────────────────────────────────────────────────────────────────╮
-│ Name                             Progress     Seeder…  Leech…  Speed       ETA    │
-│───────────────────────────────────────────────────────────────────────────────────│
-│ Dave the Diver                   0.3/1.8GB    21       0       86.97MB/s   00:31… │
-│ Kali Linux 2020.4                                                          ✓      │
-│                                                                                   │
-│                                                                                   │
-│                                                                                   │
-│                                                                                   │
-╰───────────────────────────────────────────────────────────────────────────────────╯
-```
-
+    <img src="https://raw.githubusercontent.com/GuillaumeMCK/GhostYgg/main/.github/banner.png">
 </div>
 
 > Made with ☕ for fun.
@@ -36,11 +19,9 @@ To use GhostYgg, open a terminal or command prompt and execute the following com
 $ GhostYgg file1.torrent file2.torrent ... [options]
 ```
 
-> **Note**: Dragging and dropping torrent files onto the executable is supported only on Windows for now.
-
 ### Options:
 
-- `-output`: Specifies the download directory.
+- `-o`: Specifies the download directory.
 - `-help`: Displays the help message.
 
 If no download directory is specified using the `-o` flag, the tool will use the default download folder of your
@@ -73,10 +54,10 @@ page. After downloading the binary, make it executable if necessary, and put it 
 
 ### Using Go
 
-If you have Go installed, you can install GhostYgg from source:
+If you using Go1.20 or higher, you can install GhostYgg using the following command:
 
 ```bash
-$ go get -u github.com/GuillaumeMCK/GhostYgg
+$ go install -v github.com/GuillaumeMCK/GhostYgg@latest
 ```
 
 ### From Source
@@ -93,7 +74,7 @@ To get started with GhostYgg, follow these steps:
 
    ```bash
    $ cd GhostYgg
-   $ go build -o GhostYgg src/main.go
+   $ go build GhostYgg.go
    ```
 
 3. Run the executable:
@@ -104,4 +85,5 @@ To get started with GhostYgg, follow these steps:
 
 ## Disclaimer
 
-You are responsible for what you download with GhostYgg.
+> [!CAUTION]
+> This tool is for educational purposes only. You are responsible for what you do with this tool. 
