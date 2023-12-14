@@ -1,4 +1,4 @@
-module GhostYgg
+module github.com/GuillaumeMCK/GhostYgg
 
 go 1.20
 

@@ -1,9 +1,9 @@
 package client
 
 import (
-	"GhostYgg/src/tui/constants"
-	"GhostYgg/src/utils"
 	"fmt"
+	"github.com/GuillaumeMCK/GhostYgg/src/tui/constants"
+	"github.com/GuillaumeMCK/GhostYgg/src/utils"
 	"github.com/anacrolix/log"
 	"github.com/anacrolix/torrent"
 	"net"

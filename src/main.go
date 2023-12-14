@@ -1,10 +1,10 @@
 package main
 
 import (
-	"GhostYgg/src/tui"
-	"GhostYgg/src/utils"
 	"flag"
 	"fmt"
+	"github.com/GuillaumeMCK/GhostYgg/src/tui"
+	"github.com/GuillaumeMCK/GhostYgg/src/utils"
 	"log"
 	"os"
 	"path/filepath"

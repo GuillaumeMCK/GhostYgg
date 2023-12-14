@@ -1,10 +1,10 @@
 package tui
 
 import (
-	"GhostYgg/src/client"
-	"GhostYgg/src/tui/constants"
-	"GhostYgg/src/utils"
 	"fmt"
+	"github.com/GuillaumeMCK/GhostYgg/src/client"
+	"github.com/GuillaumeMCK/GhostYgg/src/tui/constants"
+	"github.com/GuillaumeMCK/GhostYgg/src/utils"
 	"path/filepath"
 	"strings"
 
