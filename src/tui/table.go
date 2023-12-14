@@ -1,9 +1,9 @@
 package tui
 
 import (
-	"GhostYgg/src/client"
-	"GhostYgg/src/tui/constants"
-	"GhostYgg/src/utils"
+	"github.com/GuillaumeMCK/GhostYgg/src/client"
+	"github.com/GuillaumeMCK/GhostYgg/src/tui/constants"
+	"github.com/GuillaumeMCK/GhostYgg/src/utils"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"math"
@@ -80,7 +80,7 @@ func NewTable(ctx *TableCtx) *Table {
 func generateTableContent(ctx *TableCtx) ([]table.Row, []table.Column, int) {
 	height := ctx.Size.Height - 4
 	width := ctx.Size.Width - 3
-  
+
 	columns := createColumns(ctx.Columns, ctx.Widths, width)
 	rows := createRows(ctx.Rows)
 	for _, column := range columns {
