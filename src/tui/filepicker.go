@@ -20,23 +20,8 @@ func (m *FilePicker) Init() tea.Cmd {
 }
 
 func (m *FilePicker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-
-	switch msg.(type) {
-	case UpdateContainerMsg:
-		m.updateWidth()
-		return m, nil
-	case ClearErrorMsg:
-		m.Clear()
-		return m, nil
-	}
-	m.input, cmd = m.input.Update(msg)
-
-	if m.input.Focused() {
-		return m, cmd
-	}
-
-	return m, cmd
+	m.input, _ = m.input.Update(msg)
+	return m, nil
 }
 
 func (m *FilePicker) View() string {
@@ -85,9 +70,9 @@ func (m *FilePicker) updateWidth() {
 
 func (m *FilePicker) getHeight() int {
 	if !m.input.Focused() {
-		return 1
+		return 0
 	}
-	return 2
+	return 1
 }
 
 func NewFilePicker(size *utils.Size) *FilePicker {

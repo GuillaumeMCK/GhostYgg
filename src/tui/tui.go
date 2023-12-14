@@ -41,7 +41,7 @@ func (m TUI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case UpdateContainerMsg:
 		m.container.Resize(
 			constants.WindowSize.Width,
-			constants.WindowSize.Height-m.help.getHeight()-m.header.getHeight()-m.filePicker.getHeight())
+			constants.WindowSize.Height-m.header.getHeight()-m.help.getHeight()-m.filePicker.getHeight())
 		m.table.refresh(m.torrentClient.Torrents)
 		m.table.Update(msg)
 	case AddTorrentMsg:
@@ -51,6 +51,9 @@ func (m TUI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, clearErrorAfter(2)
 		}
 		m.table.refresh(m.torrentClient.Torrents)
+	case ClearErrorMsg:
+		m.filePicker.Clear()
+		m.filePicker.Update(msg)
 	}
 
 	if m.filePicker.input.Focused() {
@@ -77,10 +80,12 @@ func (m *TUI) handleFilePickerInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, nil
 				}
 				m.filePicker.input.Blur()
-				return m, addTorrent(filePath)
+				m.filePicker.Clear()
+				return m, tea.Batch(addTorrent(filePath), updateContainer())
 			}
 		case key.Matches(msg, constants.Keys.Exit):
 			m.filePicker.input.Blur()
+			m.filePicker.Clear()
 			return m, updateContainer()
 		}
 	}
