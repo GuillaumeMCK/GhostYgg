@@ -36,7 +36,7 @@ operating system.
 |----------------------------------|-------------|
 | <kbd>o</kbd>                     | Open Folder |
 | <kbd>a</kbd>                     | Add Torrent |
-| <kbd>enter</kbd>                 | Validate    |
+| <kbd>enter</kbd>                 | Select      |
 | <kbd>space</kbd>                 | Pause/Play  |
 | <kbd>backspace</kbd>             | Delete      |
 | <kbd>↑</kbd>                     | Move Up     |

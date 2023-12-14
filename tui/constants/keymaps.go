@@ -27,7 +27,7 @@ var Keys = KeyMap{
 	),
 	Enter: key.NewBinding(
 		key.WithKeys("enter"),
-		key.WithHelp("[enter]", "enter"),
+		key.WithHelp("[enter]", "select"),
 	),
 	Delete: key.NewBinding(
 		key.WithKeys("backspace"),
