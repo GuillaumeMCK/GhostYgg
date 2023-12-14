@@ -1,7 +1,7 @@
 package tui
 
 import (
-	"github.com/GuillaumeMCK/GhostYgg/src/tui/constants"
+	"github.com/GuillaumeMCK/GhostYgg/tui/constants"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"strings"

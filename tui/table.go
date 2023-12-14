@@ -1,9 +1,9 @@
 package tui
 
 import (
-	"github.com/GuillaumeMCK/GhostYgg/src/client"
-	"github.com/GuillaumeMCK/GhostYgg/src/tui/constants"
-	"github.com/GuillaumeMCK/GhostYgg/src/utils"
+	"github.com/GuillaumeMCK/GhostYgg/client"
+	"github.com/GuillaumeMCK/GhostYgg/tui/constants"
+	"github.com/GuillaumeMCK/GhostYgg/utils"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"math"

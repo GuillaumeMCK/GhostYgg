@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/GuillaumeMCK/GhostYgg/src/tui/constants"
+	"github.com/GuillaumeMCK/GhostYgg/tui/constants"
 )
 
 type TorrentInfos struct {

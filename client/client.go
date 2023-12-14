@@ -2,8 +2,8 @@ package client
 
 import (
 	"fmt"
-	"github.com/GuillaumeMCK/GhostYgg/src/tui/constants"
-	"github.com/GuillaumeMCK/GhostYgg/src/utils"
+	"github.com/GuillaumeMCK/GhostYgg/tui/constants"
+	"github.com/GuillaumeMCK/GhostYgg/utils"
 	"github.com/anacrolix/log"
 	"github.com/anacrolix/torrent"
 	"net"

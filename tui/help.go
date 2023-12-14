@@ -1,8 +1,8 @@
 package tui
 
 import (
-	"github.com/GuillaumeMCK/GhostYgg/src/tui/constants"
-	"github.com/GuillaumeMCK/GhostYgg/src/utils"
+	constants2 "github.com/GuillaumeMCK/GhostYgg/tui/constants"
+	"github.com/GuillaumeMCK/GhostYgg/utils"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
@@ -11,7 +11,7 @@ import (
 
 // Help represents the TUI help model.
 type Help struct {
-	keys      constants.KeyMap
+	keys      constants2.KeyMap
 	help      *help.Model
 	maxHeight int
 	size      *utils.Size
@@ -25,7 +25,7 @@ func (h *Help) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, constants.Keys.Help):
+		case key.Matches(msg, constants2.Keys.Help):
 			h.Swicth()
 			cmd = updateContainer()
 		}
@@ -37,10 +37,10 @@ func (h *Help) View() string {
 	h.help.Width = h.size.Width - 4
 	return lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
-		BorderForeground(constants.BORDER).
+		BorderForeground(constants2.BORDER).
 		Width(h.size.Width-2).
 		Align(lipgloss.Center).
-		Render(constants.BaseHelpStyle.Render(h.help.View(h.keys))) + "\n"
+		Render(constants2.BaseHelpStyle.Render(h.help.View(h.keys))) + "\n"
 }
 
 func (h *Help) Swicth() {
@@ -57,12 +57,12 @@ func (h *Help) getHeight() int {
 // NewHelp creates a new help model.
 func NewHelp(size *utils.Size) *Help {
 	h := help.New()
-	h.Styles = constants.HelpStyle
+	h.Styles = constants2.HelpStyle
 
 	return &Help{
-		keys:      constants.Keys,
+		keys:      constants2.Keys,
 		help:      &h,
-		maxHeight: len(constants.Keys.FullHelp()[0]),
+		maxHeight: len(constants2.Keys.FullHelp()[0]),
 		size:      size,
 	}
 }

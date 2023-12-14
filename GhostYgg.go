@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/GuillaumeMCK/GhostYgg/src/tui"
-	"github.com/GuillaumeMCK/GhostYgg/src/utils"
+	"github.com/GuillaumeMCK/GhostYgg/tui"
+	"github.com/GuillaumeMCK/GhostYgg/utils"
 	"log"
 	"os"
 	"path/filepath"

@@ -1,8 +1,8 @@
 package tui
 
 import (
-	"github.com/GuillaumeMCK/GhostYgg/src/tui/constants"
-	"github.com/GuillaumeMCK/GhostYgg/src/utils"
+	"github.com/GuillaumeMCK/GhostYgg/tui/constants"
+	"github.com/GuillaumeMCK/GhostYgg/utils"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"strings"
