@@ -66,3 +66,7 @@ func (d *TorrentInfos) Idx() int {
 func (d *TorrentInfos) IsRunning() bool {
 	return !d.aborted && !d.dropped && !d.finished
 }
+
+func (d *TorrentInfos) IsPaused() bool {
+	return d.paused
+}
