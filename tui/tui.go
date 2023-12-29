@@ -121,8 +121,8 @@ func (m *TUI) handleKeyInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if len(m.torrentClient.Torrents) == 0 {
 				return m, nil
 			}
-			torrent := m.torrentClient.Torrents[m.table.selectedRow()]
-			if torrent.IsRunning() {
+			torrent := &m.torrentClient.Torrents[m.table.selectedRow()]
+			if torrent.IsRunning() || torrent.IsPaused() {
 				torrent.PauseAndPlay()
 			}
 			return m, updateContainer()
