@@ -2,9 +2,9 @@ package tui
 
 import (
 	"fmt"
-	client2 "github.com/GuillaumeMCK/GhostYgg/client"
-	constants2 "github.com/GuillaumeMCK/GhostYgg/tui/constants"
-	utils2 "github.com/GuillaumeMCK/GhostYgg/utils"
+	"github.com/GuillaumeMCK/GhostYgg/client"
+	"github.com/GuillaumeMCK/GhostYgg/tui/constants"
+	"github.com/GuillaumeMCK/GhostYgg/utils"
 	"path/filepath"
 	"strings"
 
@@ -17,9 +17,9 @@ type TUI struct {
 	table         *Table
 	help          *Help
 	header        *Header
-	torrentClient *client2.Model
+	torrentClient *client.Model
 	filePicker    *FilePicker
-	container     *utils2.Size
+	container     *utils.Size
 }
 
 // Init initializes the TUI model and returns a command to execute during the initialization.
@@ -34,14 +34,14 @@ func (m TUI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case UpdateTuiLoopMsg, tea.WindowSizeMsg:
 		if winSize, ok := msg.(tea.WindowSizeMsg); ok {
-			constants2.WindowSize = winSize
+			constants.WindowSize = winSize
 			cmd = tea.ClearScreen
 		}
 		return m, tea.Batch(cmd, updateContainer(), updateTuiLoop())
 	case UpdateContainerMsg:
 		m.container.Resize(
-			constants2.WindowSize.Width,
-			constants2.WindowSize.Height-m.header.getHeight()-m.help.getHeight()-m.filePicker.getHeight())
+			constants.WindowSize.Width,
+			constants.WindowSize.Height-m.header.getHeight()-m.help.getHeight()-m.filePicker.getHeight())
 		m.table.refresh(m.torrentClient.Torrents)
 		m.table.Update(msg)
 		return m, nil
@@ -68,21 +68,21 @@ func (m *TUI) handleFilePickerInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, constants2.Keys.Enter):
+		case key.Matches(msg, constants.Keys.Enter):
 			value := m.filePicker.input.Value()
 			if value != "" {
 				value = strings.ReplaceAll(value, "\\", "")
 				filePath := filepath.Clean(strings.TrimRight(value, " "))
 				if filepath.Ext(filePath) != ".torrent" {
-					m.filePicker.SetError(constants2.ErrNotTorrentFile)
+					m.filePicker.SetError(constants.ErrNotTorrentFile)
 					return m, nil
-				} else if !utils2.Exist(filePath) {
-					m.filePicker.SetError(constants2.ErrFileNotFound)
+				} else if !utils.Exist(filePath) {
+					m.filePicker.SetError(constants.ErrFileNotFound)
 					return m, nil
 				}
 				return m, tea.Batch(addTorrent(filePath), updateContainer())
 			}
-		case key.Matches(msg, constants2.Keys.Exit):
+		case key.Matches(msg, constants.Keys.Exit):
 			m.filePicker.input.Blur()
 			m.filePicker.Clear()
 			return m, updateContainer()
@@ -97,27 +97,27 @@ func (m *TUI) handleKeyInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, constants2.Keys.Add):
+		case key.Matches(msg, constants.Keys.Add):
 			return m, m.filePicker.input.Focus()
-		case key.Matches(msg, constants2.Keys.Help):
+		case key.Matches(msg, constants.Keys.Help):
 			m.help.Update(msg)
 			return m, updateContainer()
-		case key.Matches(msg, constants2.Keys.Add):
+		case key.Matches(msg, constants.Keys.Add):
 			m.filePicker.Focus()
 			return m, updateContainer()
-		case key.Matches(msg, constants2.Keys.Open):
-			if err := utils2.OpenDirectory(constants2.DownloadFolder); err != nil {
+		case key.Matches(msg, constants.Keys.Open):
+			if err := utils.OpenDirectory(constants.DownloadFolder); err != nil {
 				return m, nil
 			}
 			return m, nil
-		case key.Matches(msg, constants2.Keys.Delete):
+		case key.Matches(msg, constants.Keys.Delete):
 			if len(m.torrentClient.Torrents) == 0 {
 				return m, nil
 			}
 			m.torrentClient.Torrents[m.table.selectedRow()].Abort()
 			m.table.refresh(m.torrentClient.Torrents)
 			return m, updateContainer()
-		case key.Matches(msg, constants2.Keys.PauseAndPlay):
+		case key.Matches(msg, constants.Keys.PauseAndPlay):
 			if len(m.torrentClient.Torrents) == 0 {
 				return m, nil
 			}
@@ -126,7 +126,7 @@ func (m *TUI) handleKeyInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 				torrent.PauseAndPlay()
 			}
 			return m, updateContainer()
-		case key.Matches(msg, constants2.Keys.Exit):
+		case key.Matches(msg, constants.Keys.Exit):
 			if m.filePicker.input.Focused() {
 				m.filePicker.input.Blur()
 				return m, updateContainer()
@@ -151,7 +151,7 @@ func (m TUI) View() string {
 
 // NewTUI creates a new TUI model.
 func NewTUI(torrentFiles []string) (tea.Model, tea.Cmd) {
-	torrentClient, err := client2.New(constants2.DownloadFolder, torrentFiles)
+	torrentClient, err := client.New(constants.DownloadFolder, torrentFiles)
 	if err != nil {
 		panic("Error creating torrent client")
 	}
@@ -160,10 +160,10 @@ func NewTUI(torrentFiles []string) (tea.Model, tea.Cmd) {
 		panic("Error starting torrent client")
 	}
 
-	containerSize := utils2.NewSize(80, 24)
+	containerSize := utils.NewSize(80, 24)
 
 	m := TUI{
-		table:         NewTable(&TableCtx{Rows: make([]client2.TorrentInfos, 0), Columns: constants2.TableColumns, Widths: constants2.TableWidths, Size: &containerSize}),
+		table:         NewTable(&TableCtx{Rows: make([]client.TorrentInfos, 0), Columns: constants.TableColumns, Widths: constants.TableWidths, Size: &containerSize}),
 		help:          NewHelp(&containerSize),
 		torrentClient: torrentClient,
 		filePicker:    NewFilePicker(&containerSize),
@@ -176,14 +176,14 @@ func NewTUI(torrentFiles []string) (tea.Model, tea.Cmd) {
 
 // StartTUI starts the TUI.
 func StartTUI(torrentFiles []string, downloadFolder string) error {
-	constants2.DownloadFolder = downloadFolder
+	constants.DownloadFolder = downloadFolder
 	m, err := NewTUI(torrentFiles)
 	if err != nil {
 		return fmt.Errorf("Error creating TUI: %v", err)
 	}
 
-	constants2.P = tea.NewProgram(m, tea.WithAltScreen())
-	if _, err := constants2.P.Run(); err != nil {
+	constants.P = tea.NewProgram(m, tea.WithAltScreen())
+	if _, err := constants.P.Run(); err != nil {
 		return fmt.Errorf("Error running program: %v", err)
 	}
 
