@@ -3,7 +3,7 @@ module github.com/GuillaumeMCK/GhostYgg
 go 1.20
 
 require (
-	github.com/anacrolix/log v0.14.6-0.20231202035202-ed7a02cad0b4
+	github.com/anacrolix/log v0.15.0
 	github.com/anacrolix/torrent v1.53.3
 	github.com/charmbracelet/bubbles v0.18.0
 	github.com/charmbracelet/bubbletea v0.25.0
